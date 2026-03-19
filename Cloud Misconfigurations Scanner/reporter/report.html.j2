@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Cloud Misconfiguration Scan Report</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #222639;
+    --border: #2e3250;
+    --text: #e2e8f0;
+    --muted: #8892b0;
+    --critical: #ff4444;
+    --high: #ff8800;
+    --medium: #ffcc00;
+    --low: #22d3ee;
+    --info: #64748b;
+    --green: #22c55e;
+    --purple: #a78bfa;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; line-height: 1.6; }
+  a { color: var(--purple); text-decoration: none; }
+
+  .header {
+    background: linear-gradient(135deg, #0f1117 0%, #1a1d27 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 32px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .header h1 { font-size: 22px; font-weight: 600; color: var(--text); }
+  .header .meta { color: var(--muted); font-size: 13px; margin-top: 6px; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+  .badge-prod { background: rgba(255,68,68,0.15); color: var(--critical); border: 1px solid rgba(255,68,68,0.3); }
+  .badge-staging { background: rgba(255,136,0,0.15); color: var(--high); border: 1px solid rgba(255,136,0,0.3); }
+  .badge-dev { background: rgba(34,211,238,0.15); color: var(--low); border: 1px solid rgba(34,211,238,0.3); }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 32px 40px; }
+
+  .summary-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 32px; }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+  }
+  .stat-card .count { font-size: 32px; font-weight: 700; }
+  .stat-card .label { font-size: 12px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .stat-critical .count { color: var(--critical); }
+  .stat-high .count { color: var(--high); }
+  .stat-medium .count { color: var(--medium); }
+  .stat-low .count { color: var(--low); }
+  .stat-total .count { color: var(--text); }
+
+  .section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px; }
+  .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
+
+  .bar-chart { display: flex; flex-direction: column; gap: 10px; }
+  .bar-row { display: flex; align-items: center; gap: 12px; }
+  .bar-label { width: 80px; font-size: 12px; color: var(--muted); text-align: right; }
+  .bar-track { flex: 1; height: 20px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; display: flex; align-items: center; padding-left: 8px; font-size: 11px; font-weight: 600; }
+  .bar-critical { background: rgba(255,68,68,0.7); color: #fff; }
+  .bar-high { background: rgba(255,136,0,0.7); color: #fff; }
+  .bar-medium { background: rgba(255,204,0,0.7); color: #111; }
+  .bar-low { background: rgba(34,211,238,0.5); color: #fff; }
+
+  .top-findings { list-style: none; }
+  .top-findings li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .top-findings li:last-child { border-bottom: none; }
+  .score-pill { background: var(--surface2); border-radius: 8px; padding: 2px 10px; font-size: 12px; font-weight: 700; color: var(--purple); }
+
+  /* Findings table */
+  .findings-section { margin-top: 32px; }
+  .filter-bar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+  .filter-btn {
+    padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--muted); font-size: 12px; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .filter-btn:hover { border-color: var(--purple); color: var(--text); }
+  .filter-btn.active { background: var(--purple); color: #fff; border-color: var(--purple); }
+  .filter-btn.f-critical.active { background: var(--critical); border-color: var(--critical); }
+  .filter-btn.f-high.active { background: var(--high); border-color: var(--high); }
+  .filter-btn.f-medium.active { background: var(--medium); color: #111; border-color: var(--medium); }
+  .filter-btn.f-low.active { background: var(--low); border-color: var(--low); }
+
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); border-bottom: 1px solid var(--border); background: var(--surface); }
+  td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:hover td { background: var(--surface); }
+
+  .sev-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+  }
+  .sev-CRITICAL { background: rgba(255,68,68,0.15); color: var(--critical); border: 1px solid rgba(255,68,68,0.3); }
+  .sev-HIGH     { background: rgba(255,136,0,0.15); color: var(--high); border: 1px solid rgba(255,136,0,0.3); }
+  .sev-MEDIUM   { background: rgba(255,204,0,0.12); color: var(--medium); border: 1px solid rgba(255,204,0,0.3); }
+  .sev-LOW      { background: rgba(34,211,238,0.1); color: var(--low); border: 1px solid rgba(34,211,238,0.3); }
+
+  .resource-code { font-family: monospace; font-size: 11px; color: var(--muted); word-break: break-all; }
+  .remediation { font-size: 12px; color: var(--green); margin-top: 4px; }
+  .cis-ref { font-size: 11px; color: var(--purple); }
+  .score-num { font-weight: 700; font-size: 13px; color: var(--purple); }
+  .title-cell { font-weight: 500; font-size: 13px; }
+  .desc-cell { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+  .footer { text-align: center; padding: 32px; color: var(--muted); font-size: 12px; border-top: 1px solid var(--border); margin-top: 40px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>Cloud Misconfiguration Scan Report</h1>
+    <div class="meta">
+      Account: <strong>{{ account_id }}</strong> &nbsp;|&nbsp;
+      Region: <strong>{{ region }}</strong> &nbsp;|&nbsp;
+      Scanned: <strong>{{ scanned_at }}</strong>
+    </div>
+    <div class="meta" style="margin-top:8px;">
+      Environment: <span class="badge badge-{{ environment }}">{{ environment }}</span>
+    </div>
+  </div>
+  <div style="text-align:right;">
+    <div class="meta">CIS AWS Foundations Benchmark v1.5</div>
+    <div class="meta" style="margin-top:4px;">Generated by cloud-misconfig-scanner</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Summary cards -->
+  <div class="summary-grid">
+    <div class="stat-card stat-total">
+      <div class="count">{{ summary.total }}</div>
+      <div class="label">Total findings</div>
+    </div>
+    <div class="stat-card stat-critical">
+      <div class="count">{{ summary.by_severity.CRITICAL }}</div>
+      <div class="label">Critical</div>
+    </div>
+    <div class="stat-card stat-high">
+      <div class="count">{{ summary.by_severity.HIGH }}</div>
+      <div class="label">High</div>
+    </div>
+    <div class="stat-card stat-medium">
+      <div class="count">{{ summary.by_severity.MEDIUM }}</div>
+      <div class="label">Medium</div>
+    </div>
+    <div class="stat-card stat-low">
+      <div class="count">{{ summary.by_severity.LOW }}</div>
+      <div class="label">Low</div>
+    </div>
+  </div>
+
+  <!-- Charts row -->
+  <div class="chart-row">
+    <div class="chart-card">
+      <div class="section-title">Findings by severity</div>
+      <div class="bar-chart">
+        {% set max_count = [summary.by_severity.CRITICAL, summary.by_severity.HIGH, summary.by_severity.MEDIUM, summary.by_severity.LOW] | max %}
+        {% for sev, cls in [("CRITICAL","critical"),("HIGH","high"),("MEDIUM","medium"),("LOW","low")] %}
+        <div class="bar-row">
+          <div class="bar-label">{{ sev }}</div>
+          <div class="bar-track">
+            {% if max_count > 0 %}
+            <div class="bar-fill bar-{{ cls }}" style="width: {{ (summary.by_severity[sev] / max_count * 100)|int }}%">
+              {{ summary.by_severity[sev] }}
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="section-title">Top 5 findings by risk score</div>
+      <ul class="top-findings">
+        {% for item in summary.top_5_by_score %}
+        <li>
+          <span style="max-width:80%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ item.title }}</span>
+          <span class="score-pill">{{ item.score }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <!-- Findings table -->
+  <div class="findings-section">
+    <div class="section-title">All findings</div>
+
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="filterFindings('ALL')">All ({{ summary.total }})</button>
+      <button class="filter-btn f-critical" onclick="filterFindings('CRITICAL')">Critical ({{ summary.by_severity.CRITICAL }})</button>
+      <button class="filter-btn f-high" onclick="filterFindings('HIGH')">High ({{ summary.by_severity.HIGH }})</button>
+      <button class="filter-btn f-medium" onclick="filterFindings('MEDIUM')">Medium ({{ summary.by_severity.MEDIUM }})</button>
+      <button class="filter-btn f-low" onclick="filterFindings('LOW')">Low ({{ summary.by_severity.LOW }})</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width:8%">Score</th>
+          <th style="width:9%">Severity</th>
+          <th style="width:8%">Category</th>
+          <th style="width:10%">CIS Control</th>
+          <th style="width:35%">Finding</th>
+          <th style="width:30%">Resource</th>
+        </tr>
+      </thead>
+      <tbody id="findings-tbody">
+        {% for f in findings %}
+        <tr data-severity="{{ f.severity }}">
+          <td><span class="score-num">{{ f.risk_score }}</span></td>
+          <td><span class="sev-badge sev-{{ f.severity }}">{{ f.severity }}</span></td>
+          <td style="font-size:12px; color: var(--muted);">{{ f.category }}</td>
+          <td><span class="cis-ref">{{ f.cis_control }}</span></td>
+          <td>
+            <div class="title-cell">{{ f.title }}</div>
+            <div class="desc-cell">{{ f.description }}</div>
+            <div class="remediation">&#8594; {{ f.remediation }}</div>
+          </td>
+          <td><div class="resource-code">{{ f.resource }}</div></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<div class="footer">
+  Cloud Misconfiguration Scanner &mdash; Kousik Gunasekaran &mdash; {{ scanned_at }}
+</div>
+
+<script>
+function filterFindings(severity) {
+  const rows = document.querySelectorAll('#findings-tbody tr');
+  rows.forEach(row => {
+    row.style.display = (severity === 'ALL' || row.dataset.severity === severity) ? '' : 'none';
+  });
+  document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>

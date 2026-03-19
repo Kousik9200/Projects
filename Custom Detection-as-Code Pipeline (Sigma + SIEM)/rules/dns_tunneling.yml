@@ -1,0 +1,28 @@
+title: DNS Tunneling - Potential Data Exfiltration
+id: e5f6a7b8-c9d0-1234-efab-345678901234
+status: experimental
+description: Detects abnormally long DNS queries that may indicate DNS tunneling for data exfiltration
+references:
+  - https://attack.mitre.org/techniques/T1048/001/
+author: Kousik Gunasekaran
+date: 2024/01/01
+tags:
+  - attack.exfiltration
+  - attack.t1048.001
+  - attack.command_and_control
+  - attack.t1071.004
+logsource:
+  category: dns
+detection:
+  selection:
+    QueryName|length: '>= 50'
+  filter_legitimate:
+    QueryName|endswith:
+      - '.windows.com'
+      - '.microsoft.com'
+      - '.windowsupdate.com'
+  condition: selection and not filter_legitimate
+falsepositives:
+  - Some CDN providers use long subdomain chains
+  - Internal monitoring tools
+level: medium

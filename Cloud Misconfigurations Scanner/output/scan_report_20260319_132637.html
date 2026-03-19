@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Cloud Misconfiguration Scan Report</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #222639;
+    --border: #2e3250;
+    --text: #e2e8f0;
+    --muted: #8892b0;
+    --critical: #ff4444;
+    --high: #ff8800;
+    --medium: #ffcc00;
+    --low: #22d3ee;
+    --info: #64748b;
+    --green: #22c55e;
+    --purple: #a78bfa;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; line-height: 1.6; }
+  a { color: var(--purple); text-decoration: none; }
+
+  .header {
+    background: linear-gradient(135deg, #0f1117 0%, #1a1d27 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 32px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .header h1 { font-size: 22px; font-weight: 600; color: var(--text); }
+  .header .meta { color: var(--muted); font-size: 13px; margin-top: 6px; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+  .badge-prod { background: rgba(255,68,68,0.15); color: var(--critical); border: 1px solid rgba(255,68,68,0.3); }
+  .badge-staging { background: rgba(255,136,0,0.15); color: var(--high); border: 1px solid rgba(255,136,0,0.3); }
+  .badge-dev { background: rgba(34,211,238,0.15); color: var(--low); border: 1px solid rgba(34,211,238,0.3); }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 32px 40px; }
+
+  .summary-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 32px; }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+  }
+  .stat-card .count { font-size: 32px; font-weight: 700; }
+  .stat-card .label { font-size: 12px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .stat-critical .count { color: var(--critical); }
+  .stat-high .count { color: var(--high); }
+  .stat-medium .count { color: var(--medium); }
+  .stat-low .count { color: var(--low); }
+  .stat-total .count { color: var(--text); }
+
+  .section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px; }
+  .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
+
+  .bar-chart { display: flex; flex-direction: column; gap: 10px; }
+  .bar-row { display: flex; align-items: center; gap: 12px; }
+  .bar-label { width: 80px; font-size: 12px; color: var(--muted); text-align: right; }
+  .bar-track { flex: 1; height: 20px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; display: flex; align-items: center; padding-left: 8px; font-size: 11px; font-weight: 600; }
+  .bar-critical { background: rgba(255,68,68,0.7); color: #fff; }
+  .bar-high { background: rgba(255,136,0,0.7); color: #fff; }
+  .bar-medium { background: rgba(255,204,0,0.7); color: #111; }
+  .bar-low { background: rgba(34,211,238,0.5); color: #fff; }
+
+  .top-findings { list-style: none; }
+  .top-findings li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .top-findings li:last-child { border-bottom: none; }
+  .score-pill { background: var(--surface2); border-radius: 8px; padding: 2px 10px; font-size: 12px; font-weight: 700; color: var(--purple); }
+
+  /* Findings table */
+  .findings-section { margin-top: 32px; }
+  .filter-bar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+  .filter-btn {
+    padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--muted); font-size: 12px; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .filter-btn:hover { border-color: var(--purple); color: var(--text); }
+  .filter-btn.active { background: var(--purple); color: #fff; border-color: var(--purple); }
+  .filter-btn.f-critical.active { background: var(--critical); border-color: var(--critical); }
+  .filter-btn.f-high.active { background: var(--high); border-color: var(--high); }
+  .filter-btn.f-medium.active { background: var(--medium); color: #111; border-color: var(--medium); }
+  .filter-btn.f-low.active { background: var(--low); border-color: var(--low); }
+
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); border-bottom: 1px solid var(--border); background: var(--surface); }
+  td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:hover td { background: var(--surface); }
+
+  .sev-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+  }
+  .sev-CRITICAL { background: rgba(255,68,68,0.15); color: var(--critical); border: 1px solid rgba(255,68,68,0.3); }
+  .sev-HIGH     { background: rgba(255,136,0,0.15); color: var(--high); border: 1px solid rgba(255,136,0,0.3); }
+  .sev-MEDIUM   { background: rgba(255,204,0,0.12); color: var(--medium); border: 1px solid rgba(255,204,0,0.3); }
+  .sev-LOW      { background: rgba(34,211,238,0.1); color: var(--low); border: 1px solid rgba(34,211,238,0.3); }
+
+  .resource-code { font-family: monospace; font-size: 11px; color: var(--muted); word-break: break-all; }
+  .remediation { font-size: 12px; color: var(--green); margin-top: 4px; }
+  .cis-ref { font-size: 11px; color: var(--purple); }
+  .score-num { font-weight: 700; font-size: 13px; color: var(--purple); }
+  .title-cell { font-weight: 500; font-size: 13px; }
+  .desc-cell { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+  .footer { text-align: center; padding: 32px; color: var(--muted); font-size: 12px; border-top: 1px solid var(--border); margin-top: 40px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>Cloud Misconfiguration Scan Report</h1>
+    <div class="meta">
+      Account: <strong>123456789012</strong> &nbsp;|&nbsp;
+      Region: <strong>us-east-1</strong> &nbsp;|&nbsp;
+      Scanned: <strong>2026-03-19 13:26 UTC</strong>
+    </div>
+    <div class="meta" style="margin-top:8px;">
+      Environment: <span class="badge badge-prod">prod</span>
+    </div>
+  </div>
+  <div style="text-align:right;">
+    <div class="meta">CIS AWS Foundations Benchmark v1.5</div>
+    <div class="meta" style="margin-top:4px;">Generated by cloud-misconfig-scanner</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Summary cards -->
+  <div class="summary-grid">
+    <div class="stat-card stat-total">
+      <div class="count">15</div>
+      <div class="label">Total findings</div>
+    </div>
+    <div class="stat-card stat-critical">
+      <div class="count">6</div>
+      <div class="label">Critical</div>
+    </div>
+    <div class="stat-card stat-high">
+      <div class="count">2</div>
+      <div class="label">High</div>
+    </div>
+    <div class="stat-card stat-medium">
+      <div class="count">5</div>
+      <div class="label">Medium</div>
+    </div>
+    <div class="stat-card stat-low">
+      <div class="count">2</div>
+      <div class="label">Low</div>
+    </div>
+  </div>
+
+  <!-- Charts row -->
+  <div class="chart-row">
+    <div class="chart-card">
+      <div class="section-title">Findings by severity</div>
+      <div class="bar-chart">
+        
+        
+        <div class="bar-row">
+          <div class="bar-label">CRITICAL</div>
+          <div class="bar-track">
+            
+            <div class="bar-fill bar-critical" style="width: 100%">
+              6
+            </div>
+            
+          </div>
+        </div>
+        
+        <div class="bar-row">
+          <div class="bar-label">HIGH</div>
+          <div class="bar-track">
+            
+            <div class="bar-fill bar-high" style="width: 33%">
+              2
+            </div>
+            
+          </div>
+        </div>
+        
+        <div class="bar-row">
+          <div class="bar-label">MEDIUM</div>
+          <div class="bar-track">
+            
+            <div class="bar-fill bar-medium" style="width: 83%">
+              5
+            </div>
+            
+          </div>
+        </div>
+        
+        <div class="bar-row">
+          <div class="bar-label">LOW</div>
+          <div class="bar-track">
+            
+            <div class="bar-fill bar-low" style="width: 33%">
+              2
+            </div>
+            
+          </div>
+        </div>
+        
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="section-title">Top 5 findings by risk score</div>
+      <ul class="top-findings">
+        
+        <li>
+          <span style="max-width:80%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Root account MFA not enabled</span>
+          <span class="score-pill">19.5</span>
+        </li>
+        
+        <li>
+          <span style="max-width:80%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">IAM policy 'AdminFullAccess' grants full admin (Action:* Resource:*)</span>
+          <span class="score-pill">19.5</span>
+        </li>
+        
+        <li>
+          <span style="max-width:80%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">S3 bucket 'prod-customer-data' has no public access block configuration</span>
+          <span class="score-pill">18.0</span>
+        </li>
+        
+        <li>
+          <span style="max-width:80%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">S3 bucket 'prod-customer-data' ACL grants READ to public internet</span>
+          <span class="score-pill">18.0</span>
+        </li>
+        
+        <li>
+          <span style="max-width:80%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Security group 'prod-web-sg' allows ALL inbound traffic from internet</span>
+          <span class="score-pill">18.0</span>
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  <!-- Findings table -->
+  <div class="findings-section">
+    <div class="section-title">All findings</div>
+
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="filterFindings('ALL')">All (15)</button>
+      <button class="filter-btn f-critical" onclick="filterFindings('CRITICAL')">Critical (6)</button>
+      <button class="filter-btn f-high" onclick="filterFindings('HIGH')">High (2)</button>
+      <button class="filter-btn f-medium" onclick="filterFindings('MEDIUM')">Medium (5)</button>
+      <button class="filter-btn f-low" onclick="filterFindings('LOW')">Low (2)</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width:8%">Score</th>
+          <th style="width:9%">Severity</th>
+          <th style="width:8%">Category</th>
+          <th style="width:10%">CIS Control</th>
+          <th style="width:35%">Finding</th>
+          <th style="width:30%">Resource</th>
+        </tr>
+      </thead>
+      <tbody id="findings-tbody">
+        
+        <tr data-severity="CRITICAL">
+          <td><span class="score-num">19.5</span></td>
+          <td><span class="sev-badge sev-CRITICAL">CRITICAL</span></td>
+          <td style="font-size:12px; color: var(--muted);">IAM</td>
+          <td><span class="cis-ref">CIS AWS 1.5</span></td>
+          <td>
+            <div class="title-cell">Root account MFA not enabled</div>
+            <div class="desc-cell">The AWS root account does not have MFA enabled.</div>
+            <div class="remediation">&#8594; Enable MFA for the root account via IAM console using a hardware MFA device.</div>
+          </td>
+          <td><div class="resource-code">root account</div></td>
+        </tr>
+        
+        <tr data-severity="CRITICAL">
+          <td><span class="score-num">19.5</span></td>
+          <td><span class="sev-badge sev-CRITICAL">CRITICAL</span></td>
+          <td style="font-size:12px; color: var(--muted);">IAM</td>
+          <td><span class="cis-ref">CIS AWS 1.16</span></td>
+          <td>
+            <div class="title-cell">IAM policy 'AdminFullAccess' grants full admin (Action:* Resource:*)</div>
+            <div class="desc-cell">This policy grants unrestricted access to all AWS services and resources.</div>
+            <div class="remediation">&#8594; Apply least privilege. Replace wildcard permissions with specific actions required.</div>
+          </td>
+          <td><div class="resource-code">arn:aws:iam::123456789012:policy/AdminFullAccess</div></td>
+        </tr>
+        
+        <tr data-severity="CRITICAL">
+          <td><span class="score-num">18.0</span></td>
+          <td><span class="sev-badge sev-CRITICAL">CRITICAL</span></td>
+          <td style="font-size:12px; color: var(--muted);">S3</td>
+          <td><span class="cis-ref">CIS AWS 2.1.5</span></td>
+          <td>
+            <div class="title-cell">S3 bucket 'prod-customer-data' has no public access block configuration</div>
+            <div class="desc-cell">No S3 Block Public Access configuration exists for this production data bucket.</div>
+            <div class="remediation">&#8594; Apply all four S3 Block Public Access settings at the bucket and account level.</div>
+          </td>
+          <td><div class="resource-code">arn:aws:s3:::prod-customer-data</div></td>
+        </tr>
+        
+        <tr data-severity="CRITICAL">
+          <td><span class="score-num">18.0</span></td>
+          <td><span class="sev-badge sev-CRITICAL">CRITICAL</span></td>
+          <td style="font-size:12px; color: var(--muted);">S3</td>
+          <td><span class="cis-ref">CIS AWS 2.1.5</span></td>
+          <td>
+            <div class="title-cell">S3 bucket 'prod-customer-data' ACL grants READ to public internet</div>
+            <div class="desc-cell">Bucket ACL grants READ permission to AllUsers (public internet).</div>
+            <div class="remediation">&#8594; Remove public grants from bucket ACL. Use bucket policies with specific principals.</div>
+          </td>
+          <td><div class="resource-code">arn:aws:s3:::prod-customer-data</div></td>
+        </tr>
+        
+        <tr data-severity="CRITICAL">
+          <td><span class="score-num">18.0</span></td>
+          <td><span class="sev-badge sev-CRITICAL">CRITICAL</span></td>
+          <td style="font-size:12px; color: var(--muted);">SG</td>
+          <td><span class="cis-ref">CIS AWS 5.2</span></td>
+          <td>
+            <div class="title-cell">Security group 'prod-web-sg' allows ALL inbound traffic from internet</div>
+            <div class="desc-cell">Security group sg-0abc12345 (prod-web-sg) allows all inbound traffic (0.0.0.0/0).</div>
+            <div class="remediation">&#8594; Remove the all-traffic rule. Allow only required ports with restricted CIDRs.</div>
+          </td>
+          <td><div class="resource-code">arn:aws:ec2:::security-group/sg-0abc12345</div></td>
+        </tr>
+        
+        <tr data-severity="CRITICAL">
+          <td><span class="score-num">18.0</span></td>
+          <td><span class="sev-badge sev-CRITICAL">CRITICAL</span></td>
+          <td style="font-size:12px; color: var(--muted);">SG</td>
+          <td><span class="cis-ref">CIS AWS 5.2</span></td>
+          <td>
+            <div class="title-cell">Security group 'bastion-sg' exposes port 22 (SSH) to internet</div>
+            <div class="desc-cell">Inbound rule allows SSH (port 22) from 0.0.0.0/0.</div>
+            <div class="remediation">&#8594; Restrict SSH to specific admin IP ranges or use AWS Systems Manager Session Manager.</div>
+          </td>
+          <td><div class="resource-code">arn:aws:ec2:::security-group/sg-0def67890</div></td>
+        </tr>
+        
+        <tr data-severity="HIGH">
+          <td><span class="score-num">14.62</span></td>
+          <td><span class="sev-badge sev-HIGH">HIGH</span></td>
+          <td style="font-size:12px; color: var(--muted);">IAM</td>
+          <td><span class="cis-ref">CIS AWS 1.10</span></td>
+          <td>
+            <div class="title-cell">IAM user 'dev-john' has console access but no MFA</div>
+            <div class="desc-cell">User dev-john can log into AWS console but has no MFA device configured.</div>
+            <div class="remediation">&#8594; Require MFA for user dev-john. Add MFA enforcement policy or SCP.</div>
+          </td>
+          <td><div class="resource-code">iam/user/dev-john</div></td>
+        </tr>
+        
+        <tr data-severity="HIGH">
+          <td><span class="score-num">13.5</span></td>
+          <td><span class="sev-badge sev-HIGH">HIGH</span></td>
+          <td style="font-size:12px; color: var(--muted);">SG</td>
+          <td><span class="cis-ref">CIS AWS 5.2</span></td>
+          <td>
+            <div class="title-cell">Security group 'rds-sg' exposes port 3306 (MySQL) to internet</div>
+            <div class="desc-cell">MySQL port 3306 is directly accessible from 0.0.0.0/0.</div>
+            <div class="remediation">&#8594; Place RDS in private subnets. Allow 3306 only from application security groups.</div>
+          </td>
+          <td><div class="resource-code">arn:aws:ec2:::security-group/sg-0ghi11111</div></td>
+        </tr>
+        
+        <tr data-severity="MEDIUM">
+          <td><span class="score-num">9.75</span></td>
+          <td><span class="sev-badge sev-MEDIUM">MEDIUM</span></td>
+          <td style="font-size:12px; color: var(--muted);">IAM</td>
+          <td><span class="cis-ref">CIS AWS 1.14</span></td>
+          <td>
+            <div class="title-cell">Access key for 'ci-deploy' is 127 days old</div>
+            <div class="desc-cell">Access key has not been rotated in 127 days (threshold: 90 days).</div>
+            <div class="remediation">&#8594; Rotate access keys for ci-deploy. Create new key, update CI/CD, then deactivate old key.</div>
+          </td>
+          <td><div class="resource-code">iam/user/ci-deploy/key/AKIA12345678...</div></td>
+        </tr>
+        
+        <tr data-severity="MEDIUM">
+          <td><span class="score-num">9.0</span></td>
+          <td><span class="sev-badge sev-MEDIUM">MEDIUM</span></td>
+          <td style="font-size:12px; color: var(--muted);">S3</td>
+          <td><span class="cis-ref">CIS AWS 2.1.1</span></td>
+          <td>
+            <div class="title-cell">S3 bucket 'logs-archive-2024' does not have default encryption</div>
+            <div class="desc-cell">Server-side encryption is not configured as default for this bucket.</div>
+            <div class="remediation">&#8594; Enable default encryption using SSE-S3 or SSE-KMS.</div>
+          </td>
+          <td><div class="resource-code">arn:aws:s3:::logs-archive-2024</div></td>
+        </tr>
+        
+        <tr data-severity="MEDIUM">
+          <td><span class="score-num">7.5</span></td>
+          <td><span class="sev-badge sev-MEDIUM">MEDIUM</span></td>
+          <td style="font-size:12px; color: var(--muted);">CT</td>
+          <td><span class="cis-ref">CIS AWS 3.1</span></td>
+          <td>
+            <div class="title-cell">CloudTrail trail 'prod-trail' is not multi-region</div>
+            <div class="desc-cell">Single-region trail misses API activity in other AWS regions.</div>
+            <div class="remediation">&#8594; Update trail to IsMultiRegionTrail=true to capture events across all regions.</div>
+          </td>
+          <td><div class="resource-code">aws:cloudtrail</div></td>
+        </tr>
+        
+        <tr data-severity="MEDIUM">
+          <td><span class="score-num">7.5</span></td>
+          <td><span class="sev-badge sev-MEDIUM">MEDIUM</span></td>
+          <td style="font-size:12px; color: var(--muted);">CT</td>
+          <td><span class="cis-ref">CIS AWS 3.2</span></td>
+          <td>
+            <div class="title-cell">CloudTrail trail 'prod-trail' does not have log file validation enabled</div>
+            <div class="desc-cell">Without log file validation, tampered log files cannot be detected.</div>
+            <div class="remediation">&#8594; Enable log file validation: aws cloudtrail update-trail --enable-log-file-validation</div>
+          </td>
+          <td><div class="resource-code">arn:aws:cloudtrail:us-east-1:123456789012:trail/prod-trail</div></td>
+        </tr>
+        
+        <tr data-severity="MEDIUM">
+          <td><span class="score-num">7.5</span></td>
+          <td><span class="sev-badge sev-MEDIUM">MEDIUM</span></td>
+          <td style="font-size:12px; color: var(--muted);">CT</td>
+          <td><span class="cis-ref">CIS AWS 3.x</span></td>
+          <td>
+            <div class="title-cell">No CloudWatch alarm configured for: root login</div>
+            <div class="desc-cell">CIS benchmark requires a CloudWatch alarm to alert on root account console logins.</div>
+            <div class="remediation">&#8594; Create a metric filter and SNS alarm for root login events in CloudTrail.</div>
+          </td>
+          <td><div class="resource-code">aws:cloudwatch</div></td>
+        </tr>
+        
+        <tr data-severity="LOW">
+          <td><span class="score-num">4.5</span></td>
+          <td><span class="sev-badge sev-LOW">LOW</span></td>
+          <td style="font-size:12px; color: var(--muted);">S3</td>
+          <td><span class="cis-ref">CIS AWS 2.6</span></td>
+          <td>
+            <div class="title-cell">S3 bucket 'dev-assets-bucket' does not have access logging enabled</div>
+            <div class="desc-cell">S3 access logging is not configured. Unauthorized access attempts are unlogged.</div>
+            <div class="remediation">&#8594; Enable S3 server access logging directed to a centralized security bucket.</div>
+          </td>
+          <td><div class="resource-code">arn:aws:s3:::dev-assets-bucket</div></td>
+        </tr>
+        
+        <tr data-severity="LOW">
+          <td><span class="score-num">4.5</span></td>
+          <td><span class="sev-badge sev-LOW">LOW</span></td>
+          <td style="font-size:12px; color: var(--muted);">SG</td>
+          <td><span class="cis-ref">Security hygiene</span></td>
+          <td>
+            <div class="title-cell">Security group 'old-test-sg' is not attached to any resource</div>
+            <div class="desc-cell">Unused security groups add complexity and may represent orphaned infrastructure.</div>
+            <div class="remediation">&#8594; Review and delete unused security groups to reduce attack surface.</div>
+          </td>
+          <td><div class="resource-code">arn:aws:ec2:::security-group/sg-0orphan999</div></td>
+        </tr>
+        
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<div class="footer">
+  Cloud Misconfiguration Scanner &mdash; Kousik Gunasekaran &mdash; 2026-03-19 13:26 UTC
+</div>
+
+<script>
+function filterFindings(severity) {
+  const rows = document.querySelectorAll('#findings-tbody tr');
+  rows.forEach(row => {
+    row.style.display = (severity === 'ALL' || row.dataset.severity === severity) ? '' : 'none';
+  });
+  document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+| Comment: Persistence via Scheduled Task Creation
+| Comment: Detects creation of scheduled tasks, a common persistence mechanism
+| Comment: MITRE ATT&CK Tags: attack.persistence, attack.t1053.005, attack.privilege_escalation
+index=windows sourcetype=WinEventLog:Security
+| search (Image="*\schtasks.exe" AND CommandLine="*/create*") OR (Image="*\at.exe") OR (Image="*\schtasks.exe" AND CommandLine="*/xml*")
+| table _time, host, user, CommandLine, Image, EventID
+| sort -_time

@@ -1,0 +1,266 @@
+{
+  "generated_at": "2026-03-19T13:26:37.025849+00:00",
+  "summary": {
+    "total": 15,
+    "by_severity": {
+      "CRITICAL": 6,
+      "HIGH": 2,
+      "MEDIUM": 5,
+      "LOW": 2,
+      "INFO": 0
+    },
+    "by_category": {
+      "IAM": 4,
+      "S3": 4,
+      "SG": 4,
+      "CT": 3
+    },
+    "critical_resources": [
+      "root account",
+      "arn:aws:iam::123456789012:policy/AdminFullAccess",
+      "arn:aws:s3:::prod-customer-data",
+      "arn:aws:s3:::prod-customer-data",
+      "arn:aws:ec2:::security-group/sg-0abc12345",
+      "arn:aws:ec2:::security-group/sg-0def67890"
+    ],
+    "top_5_by_score": [
+      {
+        "title": "Root account MFA not enabled",
+        "score": 19.5,
+        "severity": "CRITICAL"
+      },
+      {
+        "title": "IAM policy 'AdminFullAccess' grants full admin (Action:* Resource:*)",
+        "score": 19.5,
+        "severity": "CRITICAL"
+      },
+      {
+        "title": "S3 bucket 'prod-customer-data' has no public access block configuration",
+        "score": 18.0,
+        "severity": "CRITICAL"
+      },
+      {
+        "title": "S3 bucket 'prod-customer-data' ACL grants READ to public internet",
+        "score": 18.0,
+        "severity": "CRITICAL"
+      },
+      {
+        "title": "Security group 'prod-web-sg' allows ALL inbound traffic from internet",
+        "score": 18.0,
+        "severity": "CRITICAL"
+      }
+    ]
+  },
+  "findings": [
+    {
+      "finding_id": "IAM-001",
+      "cis_control": "CIS AWS 1.5",
+      "resource": "root account",
+      "title": "Root account MFA not enabled",
+      "severity": "CRITICAL",
+      "description": "The AWS root account does not have MFA enabled.",
+      "remediation": "Enable MFA for the root account via IAM console using a hardware MFA device.",
+      "detected_at": "2026-03-19T13:26:37.025141+00:00",
+      "risk_score": 19.5,
+      "environment": "prod",
+      "category": "IAM",
+      "priority_rank": 0
+    },
+    {
+      "finding_id": "IAM-003-AdminFullAccess",
+      "cis_control": "CIS AWS 1.16",
+      "resource": "arn:aws:iam::123456789012:policy/AdminFullAccess",
+      "title": "IAM policy 'AdminFullAccess' grants full admin (Action:* Resource:*)",
+      "severity": "CRITICAL",
+      "description": "This policy grants unrestricted access to all AWS services and resources.",
+      "remediation": "Apply least privilege. Replace wildcard permissions with specific actions required.",
+      "detected_at": "2026-03-19T13:26:37.025154+00:00",
+      "risk_score": 19.5,
+      "environment": "prod",
+      "category": "IAM",
+      "priority_rank": 0
+    },
+    {
+      "finding_id": "S3-001-prod-customer-data",
+      "cis_control": "CIS AWS 2.1.5",
+      "resource": "arn:aws:s3:::prod-customer-data",
+      "title": "S3 bucket 'prod-customer-data' has no public access block configuration",
+      "severity": "CRITICAL",
+      "description": "No S3 Block Public Access configuration exists for this production data bucket.",
+      "remediation": "Apply all four S3 Block Public Access settings at the bucket and account level.",
+      "detected_at": "2026-03-19T13:26:37.025158+00:00",
+      "risk_score": 18.0,
+      "environment": "prod",
+      "category": "S3",
+      "priority_rank": 0
+    },
+    {
+      "finding_id": "S3-002-prod-customer-data",
+      "cis_control": "CIS AWS 2.1.5",
+      "resource": "arn:aws:s3:::prod-customer-data",
+      "title": "S3 bucket 'prod-customer-data' ACL grants READ to public internet",
+      "severity": "CRITICAL",
+      "description": "Bucket ACL grants READ permission to AllUsers (public internet).",
+      "remediation": "Remove public grants from bucket ACL. Use bucket policies with specific principals.",
+      "detected_at": "2026-03-19T13:26:37.025164+00:00",
+      "risk_score": 18.0,
+      "environment": "prod",
+      "category": "S3",
+      "priority_rank": 0
+    },
+    {
+      "finding_id": "SG-001-sg-0abc12345",
+      "cis_control": "CIS AWS 5.2",
+      "resource": "arn:aws:ec2:::security-group/sg-0abc12345",
+      "title": "Security group 'prod-web-sg' allows ALL inbound traffic from internet",
+      "severity": "CRITICAL",
+      "description": "Security group sg-0abc12345 (prod-web-sg) allows all inbound traffic (0.0.0.0/0).",
+      "remediation": "Remove the all-traffic rule. Allow only required ports with restricted CIDRs.",
+      "detected_at": "2026-03-19T13:26:37.025167+00:00",
+      "risk_score": 18.0,
+      "environment": "prod",
+      "category": "SG",
+      "priority_rank": 0
+    },
+    {
+      "finding_id": "SG-002-sg-0def67890-22",
+      "cis_control": "CIS AWS 5.2",
+      "resource": "arn:aws:ec2:::security-group/sg-0def67890",
+      "title": "Security group 'bastion-sg' exposes port 22 (SSH) to internet",
+      "severity": "CRITICAL",
+      "description": "Inbound rule allows SSH (port 22) from 0.0.0.0/0.",
+      "remediation": "Restrict SSH to specific admin IP ranges or use AWS Systems Manager Session Manager.",
+      "detected_at": "2026-03-19T13:26:37.025169+00:00",
+      "risk_score": 18.0,
+      "environment": "prod",
+      "category": "SG",
+      "priority_rank": 0
+    },
+    {
+      "finding_id": "IAM-002-dev-john",
+      "cis_control": "CIS AWS 1.10",
+      "resource": "iam/user/dev-john",
+      "title": "IAM user 'dev-john' has console access but no MFA",
+      "severity": "HIGH",
+      "description": "User dev-john can log into AWS console but has no MFA device configured.",
+      "remediation": "Require MFA for user dev-john. Add MFA enforcement policy or SCP.",
+      "detected_at": "2026-03-19T13:26:37.025156+00:00",
+      "risk_score": 14.62,
+      "environment": "prod",
+      "category": "IAM",
+      "priority_rank": 1
+    },
+    {
+      "finding_id": "SG-002-sg-0ghi11111-3306",
+      "cis_control": "CIS AWS 5.2",
+      "resource": "arn:aws:ec2:::security-group/sg-0ghi11111",
+      "title": "Security group 'rds-sg' exposes port 3306 (MySQL) to internet",
+      "severity": "HIGH",
+      "description": "MySQL port 3306 is directly accessible from 0.0.0.0/0.",
+      "remediation": "Place RDS in private subnets. Allow 3306 only from application security groups.",
+      "detected_at": "2026-03-19T13:26:37.025171+00:00",
+      "risk_score": 13.5,
+      "environment": "prod",
+      "category": "SG",
+      "priority_rank": 1
+    },
+    {
+      "finding_id": "IAM-004-AKIA12345678",
+      "cis_control": "CIS AWS 1.14",
+      "resource": "iam/user/ci-deploy/key/AKIA12345678...",
+      "title": "Access key for 'ci-deploy' is 127 days old",
+      "severity": "MEDIUM",
+      "description": "Access key has not been rotated in 127 days (threshold: 90 days).",
+      "remediation": "Rotate access keys for ci-deploy. Create new key, update CI/CD, then deactivate old key.",
+      "detected_at": "2026-03-19T13:26:37.025177+00:00",
+      "risk_score": 9.75,
+      "environment": "prod",
+      "category": "IAM",
+      "priority_rank": 2
+    },
+    {
+      "finding_id": "S3-004-logs-archive",
+      "cis_control": "CIS AWS 2.1.1",
+      "resource": "arn:aws:s3:::logs-archive-2024",
+      "title": "S3 bucket 'logs-archive-2024' does not have default encryption",
+      "severity": "MEDIUM",
+      "description": "Server-side encryption is not configured as default for this bucket.",
+      "remediation": "Enable default encryption using SSE-S3 or SSE-KMS.",
+      "detected_at": "2026-03-19T13:26:37.025165+00:00",
+      "risk_score": 9.0,
+      "environment": "prod",
+      "category": "S3",
+      "priority_rank": 2
+    },
+    {
+      "finding_id": "CT-001",
+      "cis_control": "CIS AWS 3.1",
+      "resource": "aws:cloudtrail",
+      "title": "CloudTrail trail 'prod-trail' is not multi-region",
+      "severity": "MEDIUM",
+      "description": "Single-region trail misses API activity in other AWS regions.",
+      "remediation": "Update trail to IsMultiRegionTrail=true to capture events across all regions.",
+      "detected_at": "2026-03-19T13:26:37.025172+00:00",
+      "risk_score": 7.5,
+      "environment": "prod",
+      "category": "CT",
+      "priority_rank": 2
+    },
+    {
+      "finding_id": "CT-003-prod-trail",
+      "cis_control": "CIS AWS 3.2",
+      "resource": "arn:aws:cloudtrail:us-east-1:123456789012:trail/prod-trail",
+      "title": "CloudTrail trail 'prod-trail' does not have log file validation enabled",
+      "severity": "MEDIUM",
+      "description": "Without log file validation, tampered log files cannot be detected.",
+      "remediation": "Enable log file validation: aws cloudtrail update-trail --enable-log-file-validation",
+      "detected_at": "2026-03-19T13:26:37.025174+00:00",
+      "risk_score": 7.5,
+      "environment": "prod",
+      "category": "CT",
+      "priority_rank": 2
+    },
+    {
+      "finding_id": "CT-006-root_login",
+      "cis_control": "CIS AWS 3.x",
+      "resource": "aws:cloudwatch",
+      "title": "No CloudWatch alarm configured for: root login",
+      "severity": "MEDIUM",
+      "description": "CIS benchmark requires a CloudWatch alarm to alert on root account console logins.",
+      "remediation": "Create a metric filter and SNS alarm for root login events in CloudTrail.",
+      "detected_at": "2026-03-19T13:26:37.025175+00:00",
+      "risk_score": 7.5,
+      "environment": "prod",
+      "category": "CT",
+      "priority_rank": 2
+    },
+    {
+      "finding_id": "S3-005-dev-assets",
+      "cis_control": "CIS AWS 2.6",
+      "resource": "arn:aws:s3:::dev-assets-bucket",
+      "title": "S3 bucket 'dev-assets-bucket' does not have access logging enabled",
+      "severity": "LOW",
+      "description": "S3 access logging is not configured. Unauthorized access attempts are unlogged.",
+      "remediation": "Enable S3 server access logging directed to a centralized security bucket.",
+      "detected_at": "2026-03-19T13:26:37.025178+00:00",
+      "risk_score": 4.5,
+      "environment": "prod",
+      "category": "S3",
+      "priority_rank": 3
+    },
+    {
+      "finding_id": "SG-004-sg-0orphan999",
+      "cis_control": "Security hygiene",
+      "resource": "arn:aws:ec2:::security-group/sg-0orphan999",
+      "title": "Security group 'old-test-sg' is not attached to any resource",
+      "severity": "LOW",
+      "description": "Unused security groups add complexity and may represent orphaned infrastructure.",
+      "remediation": "Review and delete unused security groups to reduce attack surface.",
+      "detected_at": "2026-03-19T13:26:37.025180+00:00",
+      "risk_score": 4.5,
+      "environment": "prod",
+      "category": "SG",
+      "priority_rank": 3
+    }
+  ]
+}
