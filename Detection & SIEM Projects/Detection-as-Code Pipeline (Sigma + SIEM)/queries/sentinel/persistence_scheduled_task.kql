@@ -1,0 +1,8 @@
+// Persistence via Scheduled Task Creation
+// Detects creation of scheduled tasks, a common persistence mechanism
+// MITRE ATT&CK: attack.persistence, attack.t1053.005, attack.privilege_escalation
+DeviceProcessEvents
+| where TimeGenerated >= ago(1h)
+| where (Image endswith "\schtasks.exe" and CommandLine contains "/create") or (Image endswith "\at.exe") or (Image endswith "\schtasks.exe" and CommandLine contains "/xml")
+| project TimeGenerated, Computer, Account, CommandLine, InitiatingProcessFileName, EventID
+| sort by TimeGenerated desc

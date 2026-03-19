@@ -1,0 +1,10 @@
+// Multiple Failed Login Attempts - Potential Brute Force
+// Detects multiple failed authentication attempts that may indicate brute force attacks
+// MITRE ATT&CK: attack.credential_access, attack.t1110, attack.t1110.001
+SecurityEvent
+| where TimeGenerated >= ago(5m)
+| where (EventID == 4625 and (LogonType == 3 or LogonType == 10))
+| summarize FailedAttempts = count() by TargetUserName
+| where FailedAttempts > 10
+| project TimeGenerated, Computer, Account, CommandLine, InitiatingProcessFileName, EventID
+| sort by TimeGenerated desc

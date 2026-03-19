@@ -1,0 +1,27 @@
+title: Multiple Failed Login Attempts - Potential Brute Force
+id: d4e5f6a7-b8c9-0123-defa-234567890123
+status: stable
+description: Detects multiple failed authentication attempts that may indicate brute force attacks
+references:
+  - https://attack.mitre.org/techniques/T1110/
+author: Kousik Gunasekaran
+date: 2024/01/01
+tags:
+  - attack.credential_access
+  - attack.t1110
+  - attack.t1110.001
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4625
+    LogonType:
+      - 3
+      - 10
+  timeframe: 5m
+  condition: selection | count() by TargetUserName > 10
+falsepositives:
+  - Misconfigured service accounts
+  - Users who forgot their passwords
+level: medium
