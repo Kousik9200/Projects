@@ -1,8 +1,0 @@
-// Lateral Movement via PsExec
-// Detects lateral movement using PsExec or PsExec-like tools
-// MITRE ATT&CK: attack.lateral_movement, attack.t1021.002
-DeviceProcessEvents
-| where TimeGenerated >= ago(1h)
-| where ((Image endswith "\psexec.exe" or Image endswith "\psexec64.exe" or Image endswith "\PsExec.exe")) or ((CommandLine contains " \\\\" or CommandLine contains " -s " or CommandLine contains " /s "))
-| project TimeGenerated, Computer, Account, CommandLine, InitiatingProcessFileName, EventID
-| sort by TimeGenerated desc

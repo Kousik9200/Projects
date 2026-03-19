@@ -1,7 +1,0 @@
-| Comment: Suspicious PowerShell Encoded Command Execution
-| Comment: Detects PowerShell execution with encoded commands, commonly used in obfuscation
-| Comment: MITRE ATT&CK Tags: attack.execution, attack.t1059.001, attack.defense_evasion, attack.t1027
-index=windows sourcetype=WinEventLog:Security
-| search ((Image="*\powershell.exe" OR Image="*\pwsh.exe") AND (CommandLine="*-EncodedCommand*" OR CommandLine="*-enc *" OR CommandLine="*-ec *")) OR ((CommandLine="*-ExecutionPolicy Bypass*" OR CommandLine="*-ep bypass*" OR CommandLine="*-nop*" OR CommandLine="*-NonInteractive*"))
-| table _time, host, user, CommandLine, Image, EventID
-| sort -_time

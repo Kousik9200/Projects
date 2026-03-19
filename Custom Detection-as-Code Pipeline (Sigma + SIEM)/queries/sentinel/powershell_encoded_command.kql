@@ -1,8 +1,0 @@
-// Suspicious PowerShell Encoded Command Execution
-// Detects PowerShell execution with encoded commands, commonly used in obfuscation
-// MITRE ATT&CK: attack.execution, attack.t1059.001, attack.defense_evasion, attack.t1027
-DeviceProcessEvents
-| where TimeGenerated >= ago(1h)
-| where ((Image endswith "\powershell.exe" or Image endswith "\pwsh.exe") and (CommandLine contains "-EncodedCommand" or CommandLine contains "-enc " or CommandLine contains "-ec ")) or ((CommandLine contains "-ExecutionPolicy Bypass" or CommandLine contains "-ep bypass" or CommandLine contains "-nop" or CommandLine contains "-NonInteractive"))
-| project TimeGenerated, Computer, Account, CommandLine, InitiatingProcessFileName, EventID
-| sort by TimeGenerated desc

@@ -1,7 +1,0 @@
-| Comment: Multiple Failed Login Attempts - Potential Brute Force
-| Comment: Detects multiple failed authentication attempts that may indicate brute force attacks
-| Comment: MITRE ATT&CK Tags: attack.credential_access, attack.t1110, attack.t1110.001
-index=windows sourcetype=WinEventLog:Security
-| search (EventID=4625 AND (LogonType=3 OR LogonType=10)) | stats count by TargetUserName | where count > 10
-| table _time, host, user, CommandLine, Image, EventID
-| sort -_time

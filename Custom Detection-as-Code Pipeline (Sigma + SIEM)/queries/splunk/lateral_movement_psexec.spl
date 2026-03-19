@@ -1,7 +1,0 @@
-| Comment: Lateral Movement via PsExec
-| Comment: Detects lateral movement using PsExec or PsExec-like tools
-| Comment: MITRE ATT&CK Tags: attack.lateral_movement, attack.t1021.002
-index=windows sourcetype=WinEventLog:Security
-| search ((Image="*\psexec.exe" OR Image="*\psexec64.exe" OR Image="*\PsExec.exe")) OR ((CommandLine="* \\\\*" OR CommandLine="* -s *" OR CommandLine="* /s *"))
-| table _time, host, user, CommandLine, Image, EventID
-| sort -_time

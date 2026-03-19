@@ -1,8 +1,0 @@
-// DNS Tunneling - Potential Data Exfiltration
-// Detects abnormally long DNS queries that may indicate DNS tunneling for data exfiltration
-// MITRE ATT&CK: attack.exfiltration, attack.t1048.001, attack.command_and_control, attack.t1071.004
-DnsEvents
-| where TimeGenerated >= ago(1h)
-| where (strlen(QueryName) >= 50) or ((QueryName endswith ".windows.com" or QueryName endswith ".microsoft.com" or QueryName endswith ".windowsupdate.com"))
-| project TimeGenerated, Computer, Account, CommandLine, InitiatingProcessFileName, EventID
-| sort by TimeGenerated desc
