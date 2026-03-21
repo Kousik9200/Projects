@@ -1,0 +1,18 @@
+title: YOUR RULE TITLE
+id: 5cc0b363-c2cb-4e60-89c0-a8444dc48dca
+status: experimental
+description: Describe what this rule detects and why it matters
+tags:
+- attack.TACTIC_NAME
+- attack.tXXXX.XXX
+logsource:
+  category: process_creation OR network_connection OR dns
+  product: windows OR linux
+detection:
+  selection:
+    FieldName|contains:
+    - suspicious_value
+  condition: selection
+falsepositives:
+- Describe known benign triggers
+level: high

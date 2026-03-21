@@ -1,0 +1,9 @@
+// Mimikatz Token Impersonation via SeDebugPrivilege
+// ATT&CK: attack.privilege_escalation, attack.t1134.001, attack.credential_access, attack.t1003.001
+DeviceProcessEvents
+| where TimeGenerated >= ago(1h)
+| where ((Image endswith "\mimikatz.exe" or Image endswith "\mimilib.dll"))
+or ((CommandLine contains "privilege::debug" or CommandLine contains "sekurlsa::logonpasswords" or CommandLine contains "lsadump::sam" or CommandLine contains "token::elevate"))
+or ((ParentImage endswith "\cmd.exe" or ParentImage endswith "\powershell.exe"))
+| project TimeGenerated, DeviceName, AccountName, ProcessCommandLine, FileName, InitiatingProcessFileName
+| sort by TimeGenerated desc

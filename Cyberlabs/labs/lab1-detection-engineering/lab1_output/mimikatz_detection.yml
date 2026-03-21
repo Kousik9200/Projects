@@ -1,0 +1,38 @@
+title: Mimikatz Token Impersonation via SeDebugPrivilege
+id: 3da7d434-9964-4e30-8597-ff659a60c245
+status: experimental
+description: Detects Mimikatz privilege escalation via SeDebugPrivilege token impersonation.
+  Attackers use this to escalate to SYSTEM and dump credentials from LSASS.
+references:
+- https://attack.mitre.org/techniques/T1134/001/
+- https://github.com/gentilkiwi/mimikatz
+author: Kousik Gunasekaran
+date: 2026/03/20
+tags:
+- attack.privilege_escalation
+- attack.t1134.001
+- attack.credential_access
+- attack.t1003.001
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_image:
+    Image|endswith:
+    - \mimikatz.exe
+    - \mimilib.dll
+  selection_commandline:
+    CommandLine|contains:
+    - privilege::debug
+    - sekurlsa::logonpasswords
+    - lsadump::sam
+    - token::elevate
+  selection_parent:
+    ParentImage|endswith:
+    - \cmd.exe
+    - \powershell.exe
+  condition: selection_image or selection_commandline or selection_parent
+falsepositives:
+- Security testing by authorized red team operators
+- Forensic tools run by incident responders
+level: critical

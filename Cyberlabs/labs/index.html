@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kousik Gunasekaran — Cybersecurity Lab Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#020408; --bg2:#060d14; --bg3:#0a1520;
+  --neon:#00f5ff; --neon2:#7b2fff; --neon3:#00ff88;
+  --red:#ff2d55; --amber:#ffb800;
+  --text:#c8d8e8; --dim:#4a6070;
+  --border:rgba(0,245,255,0.12);
+  --glow:0 0 24px rgba(0,245,255,0.35);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;font-size:16px;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(0,245,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(0,245,255,.02) 1px,transparent 1px);
+  background-size:60px 60px;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;
+  padding:0 48px;height:64px;background:rgba(2,4,8,.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
+.nav-logo{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;letter-spacing:.2em;color:var(--neon);text-shadow:var(--glow);}
+.nav-sub{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--dim);letter-spacing:.15em;}
+
+/* HERO */
+.hero{min-height:50vh;display:flex;align-items:center;padding:100px 10vw 60px;position:relative;z-index:1;}
+.hero-eyebrow{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:.25em;color:var(--neon);text-transform:uppercase;margin-bottom:16px;}
+.hero-title{font-family:'Orbitron',sans-serif;font-size:clamp(32px,5vw,64px);font-weight:900;color:#fff;text-shadow:0 0 60px rgba(0,245,255,.3);line-height:1;}
+.hero-title span{color:var(--neon);}
+.hero-sub{font-size:16px;color:rgba(200,216,232,.6);margin-top:16px;max-width:580px;line-height:1.8;}
+.hero-stats{display:flex;gap:40px;margin-top:40px;padding-top:32px;border-top:1px solid var(--border);}
+.stat-val{font-family:'Orbitron',sans-serif;font-size:28px;font-weight:700;color:var(--neon);}
+.stat-lbl{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:.12em;color:var(--dim);text-transform:uppercase;margin-top:4px;}
+
+/* LABS GRID */
+.labs-section{position:relative;z-index:1;padding:80px 10vw;}
+.sec-head{display:flex;align-items:center;gap:20px;margin-bottom:48px;}
+.sec-num{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--neon);letter-spacing:.2em;}
+.sec-title{font-family:'Orbitron',sans-serif;font-size:clamp(20px,2.5vw,28px);font-weight:700;color:#fff;letter-spacing:.05em;}
+.sec-line{flex:1;height:1px;background:var(--border);}
+.labs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+
+/* LAB CARD */
+.lab-card{background:var(--bg3);border:1px solid var(--border);border-radius:4px;
+  padding:0;overflow:hidden;position:relative;transition:border-color .3s,transform .3s,box-shadow .3s;
+  display:flex;flex-direction:column;}
+.lab-card:hover{border-color:rgba(0,245,255,.45);transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,.4),var(--glow);}
+.lab-card-accent{height:3px;width:100%;}
+.lab-card-body{padding:28px;flex:1;display:flex;flex-direction:column;}
+.lab-num{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--dim);letter-spacing:.2em;margin-bottom:12px;}
+.lab-title{font-family:'Orbitron',sans-serif;font-size:15px;font-weight:700;color:#fff;letter-spacing:.04em;margin-bottom:12px;line-height:1.3;}
+.lab-desc{font-size:13px;color:rgba(200,216,232,.65);line-height:1.8;flex:1;}
+.lab-meta{margin-top:20px;display:flex;flex-direction:column;gap:10px;}
+.lab-tags{display:flex;flex-wrap:wrap;gap:6px;}
+.tag{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.1em;padding:3px 8px;border-radius:2px;
+  background:rgba(0,245,255,.06);border:1px solid rgba(0,245,255,.15);color:var(--neon);text-transform:uppercase;}
+.tag.p{background:rgba(123,47,255,.08);border-color:rgba(123,47,255,.2);color:var(--neon2);}
+.tag.g{background:rgba(0,255,136,.07);border-color:rgba(0,255,136,.18);color:var(--neon3);}
+.tag.r{background:rgba(255,45,85,.07);border-color:rgba(255,45,85,.18);color:var(--red);}
+.tag.a{background:rgba(255,184,0,.07);border-color:rgba(255,184,0,.18);color:var(--amber);}
+.lab-difficulty{display:flex;align-items:center;gap:8px;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--dim);}
+.diff-dots{display:flex;gap:4px;}
+.dot{width:8px;height:8px;border-radius:50%;border:1px solid var(--dim);}
+.dot.filled.neon{background:var(--neon);border-color:var(--neon);box-shadow:0 0 6px var(--neon);}
+.dot.filled.amber{background:var(--amber);border-color:var(--amber);}
+.dot.filled.red{background:var(--red);border-color:var(--red);}
+.lab-exercises{margin-top:10px;}
+.lab-exercises-title{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.15em;color:var(--dim);text-transform:uppercase;margin-bottom:8px;}
+.exercise-list{list-style:none;display:flex;flex-direction:column;gap:5px;}
+.exercise-list li{font-size:12px;color:rgba(200,216,232,.55);padding-left:14px;position:relative;line-height:1.5;}
+.exercise-list li::before{content:'▸';position:absolute;left:0;color:var(--neon);font-size:10px;}
+
+/* FULL LAB SECTIONS */
+.full-labs{position:relative;z-index:1;}
+.lab-section{padding:80px 10vw;border-top:1px solid var(--border);}
+.lab-section:nth-child(even){background:var(--bg2);}
+.lab-header{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:40px;}
+.lab-header-left{}
+.lab-badge{display:inline-block;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.15em;
+  padding:4px 12px;border-radius:2px;text-transform:uppercase;margin-bottom:12px;}
+.lab-h2{font-family:'Orbitron',sans-serif;font-size:clamp(20px,2.8vw,32px);font-weight:700;color:#fff;letter-spacing:.04em;}
+.lab-h2 span{color:var(--neon);}
+.lab-objective{max-width:700px;font-size:15px;color:rgba(200,216,232,.7);line-height:1.8;margin-top:12px;}
+.run-cmd{background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:12px 20px;
+  font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--neon3);margin-top:16px;display:inline-block;}
+.run-cmd span{color:var(--dim);}
+
+/* EXERCISES */
+.exercises-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:32px;}
+.exercise-card{background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:24px;}
+.exercise-card:hover{border-color:rgba(0,245,255,.3);}
+.ex-num{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.2em;color:var(--neon);margin-bottom:8px;}
+.ex-title{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:600;color:#fff;margin-bottom:10px;}
+.ex-body{font-size:13px;color:rgba(200,216,232,.6);line-height:1.8;}
+.ex-body code{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--neon3);
+  background:rgba(0,255,136,.06);padding:1px 6px;border-radius:2px;}
+
+/* CODE BLOCK */
+.code-block{background:#010306;border:1px solid var(--border);border-radius:4px;
+  padding:20px 24px;margin-top:20px;overflow-x:auto;}
+.code-block pre{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--neon3);line-height:1.8;white-space:pre;}
+.code-comment{color:var(--dim);}
+.code-cmd{color:var(--neon);}
+.code-output{color:rgba(200,216,232,.5);}
+
+/* ATTACK MAP */
+.attack-table{width:100%;border-collapse:collapse;margin-top:20px;}
+.attack-table th{text-align:left;padding:8px 12px;font-family:'Share Tech Mono',monospace;font-size:10px;
+  letter-spacing:.12em;color:var(--dim);border-bottom:1px solid var(--border);text-transform:uppercase;}
+.attack-table td{padding:10px 12px;border-bottom:1px solid rgba(0,245,255,.05);font-size:13px;vertical-align:top;}
+.attack-table tr:hover td{background:rgba(0,245,255,.03);}
+.att-tech{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--neon);letter-spacing:.08em;}
+.att-tactic{color:var(--neon2);font-size:12px;}
+
+/* CHALLENGE BOX */
+.challenge-box{background:rgba(0,255,136,.04);border:1px solid rgba(0,255,136,.2);border-radius:4px;
+  padding:20px 24px;margin-top:24px;}
+.challenge-title{font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;color:var(--neon3);
+  letter-spacing:.1em;margin-bottom:10px;}
+.challenge-body{font-size:13px;color:rgba(200,216,232,.65);line-height:1.8;}
+
+/* PROGRESS BAR */
+.progress-row{display:flex;align-items:center;gap:12px;margin-top:8px;}
+.progress-label{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--dim);width:80px;text-align:right;}
+.progress-track{flex:1;height:6px;background:rgba(255,255,255,.05);border-radius:3px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:3px;transition:width .4s;}
+
+/* FOOTER */
+footer{background:var(--bg);border-top:1px solid var(--border);padding:32px 10vw;display:flex;
+  justify-content:space-between;align-items:center;position:relative;z-index:1;}
+.footer-logo{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;color:var(--neon);letter-spacing:.2em;}
+.footer-copy{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--dim);letter-spacing:.1em;}
+
+@media(max-width:900px){
+  .labs-grid{grid-template-columns:1fr;}
+  .exercises-grid{grid-template-columns:1fr;}
+  nav{padding:0 24px;}
+  .hero,.labs-section,.lab-section,footer{padding-left:24px;padding-right:24px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div>
+    <div class="nav-logo">KG://LABS</div>
+    <div class="nav-sub">Cybersecurity Lab Guide — Kousik Gunasekaran</div>
+  </div>
+  <a href="kousik-portfolio.html" style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--dim);text-decoration:none;letter-spacing:.12em;">← Portfolio</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div>
+    <div class="hero-eyebrow">// Hands-on security labs</div>
+    <h1 class="hero-title">CYBER<span>LABS</span></h1>
+    <p class="hero-sub">Six production-grade labs built from real SOC experience, project work, and the MITRE ATT&CK framework. Each includes runnable Python scripts, guided exercises, and a challenge extension.</p>
+    <div class="hero-stats">
+      <div><div class="stat-val">7</div><div class="stat-lbl">Labs</div></div>
+      <div><div class="stat-val">35+</div><div class="stat-lbl">Exercises</div></div>
+      <div><div class="stat-val">7</div><div class="stat-lbl">Python scripts</div></div>
+      <div><div class="stat-val">15+</div><div class="stat-lbl">ATT&amp;CK techniques</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- LAB CARDS OVERVIEW -->
+<div class="labs-section">
+  <div class="sec-head">
+    <span class="sec-num">[ 00 ]</span>
+    <h2 class="sec-title">Lab Overview</h2>
+    <div class="sec-line"></div>
+  </div>
+  <div class="labs-grid">
+
+    <div class="lab-card">
+      <div class="lab-card-accent" style="background:linear-gradient(90deg,var(--neon),transparent)"></div>
+      <div class="lab-card-body">
+        <div class="lab-num">// LAB-01</div>
+        <div class="lab-title">Detection Engineering</div>
+        <div class="lab-desc">Write Sigma rules, validate MITRE ATT&CK tags, convert to Splunk SPL and Sentinel KQL, and simulate CI/CD deployment.</div>
+        <div class="lab-meta">
+          <div class="lab-tags">
+            <span class="tag">Sigma</span><span class="tag p">Splunk</span><span class="tag p">Sentinel</span><span class="tag g">MITRE ATT&CK</span>
+          </div>
+          <div class="lab-difficulty">
+            <span>Difficulty:</span>
+            <div class="diff-dots">
+              <div class="dot filled neon"></div><div class="dot filled neon"></div><div class="dot filled neon"></div><div class="dot"></div><div class="dot"></div>
+            </div>
+            <span>Intermediate</span>
+          </div>
+          <div class="lab-exercises">
+            <div class="lab-exercises-title">Exercises</div>
+            <ul class="exercise-list">
+              <li>Author a Mimikatz detection Sigma rule</li>
+              <li>Validate ATT&CK technique tags</li>
+              <li>Convert to SPL and KQL</li>
+              <li>Simulate SIEM deployment</li>
+              <li>Challenge: write your own rule</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lab-card">
+      <div class="lab-card-accent" style="background:linear-gradient(90deg,var(--neon2),transparent)"></div>
+      <div class="lab-card-body">
+        <div class="lab-num">// LAB-02</div>
+        <div class="lab-title">Cloud Security Audit</div>
+        <div class="lab-desc">Audit a simulated AWS environment against CIS Benchmark v1.5. Score findings by risk and build a phased remediation plan.</div>
+        <div class="lab-meta">
+          <div class="lab-tags">
+            <span class="tag a">AWS</span><span class="tag">CIS Benchmark</span><span class="tag g">IAM</span><span class="tag">S3</span>
+          </div>
+          <div class="lab-difficulty">
+            <span>Difficulty:</span>
+            <div class="diff-dots">
+              <div class="dot filled neon"></div><div class="dot filled neon"></div><div class="dot filled neon"></div><div class="dot"></div><div class="dot"></div>
+            </div>
+            <span>Intermediate</span>
+          </div>
+          <div class="lab-exercises">
+            <div class="lab-exercises-title">Exercises</div>
+            <ul class="exercise-list">
+              <li>Inspect mock AWS environment</li>
+              <li>Run CIS Benchmark audit checks</li>
+              <li>Apply risk scoring with env multipliers</li>
+              <li>Generate remediation roadmap</li>
+              <li>Challenge: find 3 hidden findings</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lab-card">
+      <div class="lab-card-accent" style="background:linear-gradient(90deg,var(--neon3),transparent)"></div>
+      <div class="lab-card-body">
+        <div class="lab-num">// LAB-03</div>
+        <div class="lab-title">Threat Hunting</div>
+        <div class="lab-desc">Hunt for 8 embedded attacker TTPs in 500 simulated Windows/Sysmon log events using hypothesis-driven queries aligned to ATT&CK.</div>
+        <div class="lab-meta">
+          <div class="lab-tags">
+            <span class="tag">Splunk SPL</span><span class="tag g">MITRE ATT&CK</span><span class="tag">UEBA</span><span class="tag p">Sysmon</span>
+          </div>
+          <div class="lab-difficulty">
+            <span>Difficulty:</span>
+            <div class="diff-dots">
+              <div class="dot filled amber"></div><div class="dot filled amber"></div><div class="dot filled amber"></div><div class="dot filled amber"></div><div class="dot"></div>
+            </div>
+            <span>Advanced</span>
+          </div>
+          <div class="lab-exercises">
+            <div class="lab-exercises-title">Exercises</div>
+            <ul class="exercise-list">
+              <li>Generate 500-event log dataset with 8 TTPs</li>
+              <li>Run 6 ATT&CK-mapped hypotheses</li>
+              <li>Measure precision & recall per hunt</li>
+              <li>Behavioral analytics for brute force</li>
+              <li>Reconstruct attacker timeline</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lab-card">
+      <div class="lab-card-accent" style="background:linear-gradient(90deg,var(--red),transparent)"></div>
+      <div class="lab-card-body">
+        <div class="lab-num">// LAB-04</div>
+        <div class="lab-title">DFIR Investigation</div>
+        <div class="lab-desc">Analyze forensic artifacts from a compromised endpoint. Extract IOCs, map to ATT&CK, reconstruct the timeline, and write a formal IR report.</div>
+        <div class="lab-meta">
+          <div class="lab-tags">
+            <span class="tag r">Forensics</span><span class="tag">Prefetch</span><span class="tag p">Event Logs</span><span class="tag g">IOCs</span>
+          </div>
+          <div class="lab-difficulty">
+            <span>Difficulty:</span>
+            <div class="diff-dots">
+              <div class="dot filled amber"></div><div class="dot filled amber"></div><div class="dot filled amber"></div><div class="dot filled amber"></div><div class="dot"></div>
+            </div>
+            <span>Advanced</span>
+          </div>
+          <div class="lab-exercises">
+            <div class="lab-exercises-title">Exercises</div>
+            <ul class="exercise-list">
+              <li>Analyze prefetch files & event logs</li>
+              <li>Extract IOCs (IPs, hashes, registry)</li>
+              <li>Map 9 ATT&CK techniques to evidence</li>
+              <li>Build chronological attack timeline</li>
+              <li>Write executive IR report</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lab-card">
+      <div class="lab-card-accent" style="background:linear-gradient(90deg,var(--amber),transparent)"></div>
+      <div class="lab-card-body">
+        <div class="lab-num">// LAB-05</div>
+        <div class="lab-title">Phishing Analysis & IR</div>
+        <div class="lab-desc">Analyze 3 phishing emails (credential harvesting, malware delivery, BEC). Extract IOCs, classify campaigns, and trigger automated response actions.</div>
+        <div class="lab-meta">
+          <div class="lab-tags">
+            <span class="tag a">SPF/DKIM/DMARC</span><span class="tag r">URL Analysis</span><span class="tag">BEC</span><span class="tag p">FastAPI</span>
+          </div>
+          <div class="lab-difficulty">
+            <span>Difficulty:</span>
+            <div class="diff-dots">
+              <div class="dot filled neon"></div><div class="dot filled neon"></div><div class="dot filled neon"></div><div class="dot"></div><div class="dot"></div>
+            </div>
+            <span>Intermediate</span>
+          </div>
+          <div class="lab-exercises">
+            <div class="lab-exercises-title">Exercises</div>
+            <ul class="exercise-list">
+              <li>Analyze email authentication headers</li>
+              <li>Extract URLs, hashes, encoded strings</li>
+              <li>Score threat severity (0–100)</li>
+              <li>Classify campaign type (BEC / cred / malware)</li>
+              <li>Trigger automated response playbook</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lab-card">
+      <div class="lab-card-accent" style="background:linear-gradient(90deg,var(--red),transparent)"></div>
+      <div class="lab-card-body">
+        <div class="lab-num">// LAB-06</div>
+        <div class="lab-title">Penetration Testing</div>
+        <div class="lab-desc">Follow PTES against a Metasploitable 2 topology. Recon, enumerate 13 services, simulate 7 CVE exploits, post-exploit, and write a professional pentest report.</div>
+        <div class="lab-meta">
+          <div class="lab-tags">
+            <span class="tag r">Metasploit</span><span class="tag">Nmap</span><span class="tag a">7 CVEs</span><span class="tag p">PTES</span>
+          </div>
+          <div class="lab-difficulty">
+            <span>Difficulty:</span>
+            <div class="diff-dots">
+              <div class="dot filled red"></div><div class="dot filled red"></div><div class="dot filled red"></div><div class="dot filled red"></div><div class="dot filled red"></div>
+            </div>
+            <span>Expert</span>
+          </div>
+          <div class="lab-exercises">
+            <div class="lab-exercises-title">Exercises</div>
+            <ul class="exercise-list">
+              <li>Simulated Nmap recon (13 open ports)</li>
+              <li>Service enumeration & default cred checks</li>
+              <li>Simulated exploitation (vsftpd, Samba, IRC)</li>
+              <li>Post-exploitation enumeration</li>
+              <li>Professional pentest report</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lab-card">
+      <div class="lab-card-accent" style="background:linear-gradient(90deg,var(--neon2),transparent)"></div>
+      <div class="lab-card-body">
+        <div class="lab-num">// LAB-07</div>
+        <div class="lab-title">Zero Trust & Network Security</div>
+        <div class="lab-desc">Design a 3-VLAN Zero Trust lab. Build a policy engine, analyze mTLS certificate design, simulate 6 lateral movement attacks, and score your ZT maturity against NIST SP 800-207.</div>
+        <div class="lab-meta">
+          <div class="lab-tags">
+            <span class="tag p">Zero Trust</span><span class="tag">mTLS</span><span class="tag g">NIST 800-207</span><span class="tag a">Microseg</span>
+          </div>
+          <div class="lab-difficulty">
+            <span>Difficulty:</span>
+            <div class="diff-dots">
+              <div class="dot filled amber"></div><div class="dot filled amber"></div><div class="dot filled amber"></div><div class="dot filled amber"></div><div class="dot"></div>
+            </div>
+            <span>Advanced</span>
+          </div>
+          <div class="lab-exercises">
+            <div class="lab-exercises-title">Exercises</div>
+            <ul class="exercise-list">
+              <li>Design 3-VLAN Zero Trust topology</li>
+              <li>Build default-deny policy engine</li>
+              <li>Analyze mTLS cert design (TTL, algo)</li>
+              <li>Simulate 6 lateral movement attacks</li>
+              <li>Score ZT maturity (CISA model)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FULL LAB DETAIL SECTIONS -->
+<div class="full-labs">
+
+  <!-- LAB 1 -->
+  <div class="lab-section" id="lab1">
+    <div class="lab-header">
+      <div class="lab-header-left">
+        <div class="lab-badge" style="background:rgba(0,245,255,.08);border:1px solid rgba(0,245,255,.2);color:var(--neon);">LAB-01 // DETECTION ENGINEERING</div>
+        <h2 class="lab-h2"><span>Detection-as-Code</span> — Sigma Rule Pipeline</h2>
+        <p class="lab-objective">Write a production Sigma rule for Mimikatz detection, validate ATT&CK tagging, convert to Splunk SPL and Sentinel KQL, then simulate automated CI/CD deployment to both SIEMs.</p>
+        <div class="run-cmd"><span>$</span> python lab1_detection_engineering.py</div>
+      </div>
+    </div>
+    <div class="exercises-grid">
+      <div class="exercise-card">
+        <div class="ex-num">// EXERCISE 1</div>
+        <div class="ex-title">Write a Sigma Rule</div>
+        <div class="ex-body">Author a Sigma YAML rule targeting Mimikatz T1003.001 (LSASS credential dump). Include <code>logsource</code>, <code>detection</code> with multiple selections, and proper <code>tags</code> for tactic + technique. The script saves it to <code>lab1_output/mimikatz_detection.yml</code>.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-num">// EXERCISE 2</div>
+        <div class="ex-title">ATT&CK Tag Validation</div>
+        <div class="ex-body">Run the validator against your rule. It checks required fields (<code>title</code>, <code>description</code>, <code>detection</code>, <code>level</code>), verifies all <code>attack.tXXXX</code> technique IDs exist, confirms at least one tactic tag, and validates severity level. Fails CI if any check fails.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-num">// EXERCISE 3</div>
+        <div class="ex-title">Convert to Splunk SPL</div>
+        <div class="ex-body">The converter reads your Sigma YAML and maps field modifiers (<code>|contains</code>, <code>|endswith</code>) to SPL equivalents (<code>field="*value*"</code>). Output is a fully runnable saved search with <code>index=windows</code> scope, table projection, and sort. Saved to <code>lab1_output/mimikatz_detection.spl</code>.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-num">// EXERCISE 4</div>
+        <div class="ex-title">Convert to Sentinel KQL</div>
+        <div class="ex-body">Same rule converted to KQL for Microsoft Sentinel. Field modifiers map to KQL operators (<code>contains</code>, <code>endswith</code>). Output targets <code>DeviceProcessEvents</code> table with <code>where TimeGenerated >= ago(1h)</code> windowing. Saved to <code>lab1_output/mimikatz_detection.kql</code>.</div>
+      </div>
+    </div>
+    <div class="challenge-box">
+      <div class="challenge-title">⚡ Challenge: Write Your Own Rule</div>
+      <div class="challenge-body">Edit <code>lab1_output/YOUR_RULE_challenge.yml</code> and write a detection for one of: T1078 (Valid Accounts — impossible travel), T1190 (Exploit Public-Facing App — web shell upload), or T1071.004 (DNS C2 beaconing). Validate it passes all checks, then convert to both SIEM targets.</div>
+    </div>
+    <div class="code-block">
+      <pre><span class="code-comment"># Sample generated Splunk SPL output</span>
+<span class="code-cmd">index=windows</span> EventCode=4688 OR EventCode=1
+| search (Image="*\mimikatz.exe" OR Image="*\mimilib.dll")
+       OR (CommandLine="*privilege::debug*"
+           OR CommandLine="*sekurlsa::logonpasswords*"
+           OR CommandLine="*lsadump::sam*")
+| table _time, host, user, CommandLine, Image, ParentImage
+| sort -_time</pre>
+    </div>
+  </div>
+
+  <!-- LAB 2 -->
+  <div class="lab-section" id="lab2">
+    <div class="lab-header">
+      <div class="lab-header-left">
+        <div class="lab-badge" style="background:rgba(123,47,255,.08);border:1px solid rgba(123,47,255,.2);color:var(--neon2);">LAB-02 // CLOUD SECURITY</div>
+        <h2 class="lab-h2"><span>CIS Benchmark</span> — AWS Misconfiguration Audit</h2>
+        <p class="lab-objective">Audit a simulated production AWS account across IAM, S3, security groups, and CloudTrail against 18 CIS AWS Foundations Benchmark v1.5 controls. Score every finding and build a phased remediation plan.</p>
+        <div class="run-cmd"><span>$</span> python lab2_cloud_security_audit.py</div>
+      </div>
+    </div>
+    <div class="exercises-grid">
+      <div class="exercise-card">
+        <div class="ex-num">// EXERCISE 1</div>
+        <div class="ex-title">Inspect the Mock AWS Environment</div>
+        <div class="ex-body">The mock environment contains a production account with intentional misconfigurations: root MFA disabled, users without MFA, a wildcard IAM policy (<code>Action:* Resource:*</code>), a public S3 bucket, SSH/RDP open security groups, and a single-region CloudTrail without log validation.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-num">// EXERCISE 2</div>
+        <div class="ex-title">CIS Benchmark Audit</div>
+        <div class="ex-body">Four audit modules run in sequence: <code>audit_iam()</code> (5 checks), <code>audit_s3()</code> (15 checks across 4 buckets), <code>audit_security_groups()</code> (checks all 5 SGs for dangerous ports and all-traffic rules), and <code>audit_cloudtrail()</code> (2 checks). Each finding maps to a CIS control reference.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-num">// EXERCISE 3</div>
+        <div class="ex-title">Risk Scoring</div>
+        <div class="ex-body">Every finding gets a numeric risk score: <code>base_severity × category_weight × env_multiplier</code>. Production accounts multiply by 1.5×. IAM and S3 categories carry a 1.2–1.3× category weight because they directly expose data. A Critical IAM finding in prod scores up to <code>10.0 × 1.3 × 1.5 = 19.5</code>.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-num">// EXERCISE 4</div>
+        <div class="ex-title">Remediation Planning</div>
+        <div class="ex-body">Findings are bucketed into 4 phases: IMMEDIATE (Critical — patch within 24h), THIS WEEK (High), THIS MONTH (Medium), and BACKLOG (Low). Each item includes a specific remediation action with effort estimate. The plan is saved as JSON for Jira import or Notion tracking.</div>
+      </div>
+    </div>
+    <div class="challenge-box">
+      <div class="challenge-title">⚡ Challenge: Find the 3 Hidden Findings</div>
+      <div class="challenge-body">Replace <code>MOCK_AWS_ENV</code> with <code>CHALLENGE_ENV</code> in <code>run_lab()</code> and re-run. Three additional findings are embedded: a CloudTrail log bucket with public access, an additional user with a wildcard IAM policy, and a service account with an over-privileged inline policy. Can you find all three?</div>
+    </div>
+  </div>
+
+  <!-- LAB 3 -->
+  <div class="lab-section" id="lab3">
+    <div class="lab-header">
+      <div class="lab-header-left">
+        <div class="lab-badge" style="background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.2);color:var(--neon3);">LAB-03 // THREAT HUNTING</div>
+        <h2 class="lab-h2"><span>Hypothesis-Driven</span> — Hunt for Hidden TTPs</h2>
+        <p class="lab-objective">Hunt for 8 embedded attacker TTPs across 500 simulated Windows Security and Sysmon log events. Six ATT&CK-aligned hypotheses. Measure precision, recall, and false positive rate for each hunt query.</p>
+        <div class="run-cmd"><span>$</span> python lab3_threat_hunting.py</div>
+      </div>
+    </div>
+    <table class="attack-table">
+      <thead>
+        <tr><th>Hypothesis</th><th>ATT&CK</th><th>What to Hunt</th><th>Precision Target</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>H-01</td><td class="att-tech">T1059.001</td><td>PowerShell -enc / -ExecutionPolicy Bypass</td><td>Tune to &gt;90%</td></tr>
+        <tr><td>H-02</td><td class="att-tech">T1003.001</td><td>LSASS dump: comsvcs.dll MiniDump / procdump</td><td>100% (no FP)</td></tr>
+        <tr><td>H-03</td><td class="att-tech">T1021.002</td><td>PsExec / PaExec lateral movement</td><td>100% (no FP)</td></tr>
+        <tr><td>H-04</td><td class="att-tech">T1053.005</td><td>schtasks.exe /create command</td><td>100% (no FP)</td></tr>
+        <tr><td>H-05</td><td class="att-tech">T1110</td><td>EventID 4625 count &gt; 3 per user in 5min</td><td>&gt;80%</td></tr>
+        <tr><td>H-06</td><td class="att-tech">T1048.001</td><td>DNS query length &gt;40 chars (tunneling)</td><td>Tune threshold</td></tr>
+      </tbody>
+    </table>
+    <div class="challenge-box">
+      <div class="challenge-title">⚡ Challenge: Eliminate False Positives in H-01</div>
+      <div class="challenge-body">H-01 (PowerShell detection) hits legitimate PowerShell usage in addition to attacker activity, giving you false positives and a precision below 100%. Add parent process checking (<code>ParentImage not in (trusted list)</code>) and working directory constraints to the hypothesis query to eliminate FPs without missing the true positive. Target: precision = 100%.</div>
+    </div>
+  </div>
+
+  <!-- LAB 4 -->
+  <div class="lab-section" id="lab4">
+    <div class="lab-header">
+      <div class="lab-header-left">
+        <div class="lab-badge" style="background:rgba(255,45,85,.07);border:1px solid rgba(255,45,85,.2);color:var(--red);">LAB-04 // DFIR</div>
+        <h2 class="lab-h2"><span>Forensic Investigation</span> — Breach on WS-BOB-02</h2>
+        <p class="lab-objective">A host is compromised. Analyze Prefetch files, Windows Event Logs, registry keys, network connections, and file hashes to reconstruct the full attack chain, extract IOCs, and write an executive IR report.</p>
+        <div class="run-cmd"><span>$</span> python lab4_dfir.py</div>
+      </div>
+    </div>
+    <table class="attack-table">
+      <thead><tr><th>Technique</th><th>Tactic</th><th>Evidence Source</th></tr></thead>
+      <tbody>
+        <tr><td class="att-tech">T1566.001</td><td class="att-tactic">Initial Access</td><td>Outlook.exe prefetch + timing correlation</td></tr>
+        <tr><td class="att-tech">T1059.001</td><td class="att-tactic">Execution</td><td>EventID 4688: powershell.exe -nop -enc SQBFAFg...</td></tr>
+        <tr><td class="att-tech">T1003.001</td><td class="att-tactic">Credential Access</td><td>EventID 4688: rundll32.exe comsvcs.dll MiniDump + lsass.dmp file</td></tr>
+        <tr><td class="att-tech">T1134.001</td><td class="att-tactic">Priv Escalation</td><td>mimikatz.exe prefetch + EventID 4688 with privilege::debug</td></tr>
+        <tr><td class="att-tech">T1021.002</td><td class="att-tactic">Lateral Movement</td><td>PsExec64.exe prefetch + EventID 4624 logon type 3 on SRV-DC-01</td></tr>
+        <tr><td class="att-tech">T1053.005</td><td class="att-tactic">Persistence</td><td>EventID 4688: schtasks /create /tn WindowsUpdate + EventID 4698</td></tr>
+        <tr><td class="att-tech">T1547.001</td><td class="att-tactic">Persistence</td><td>Registry: HKCU\...\Run\WindowsUpdate = C:\Temp\payload.exe</td></tr>
+        <tr><td class="att-tech">T1071.001</td><td class="att-tactic">C2</td><td>Network: SRV-DC-01 → 185.220.101.47:443 (HTTPS beacon)</td></tr>
+        <tr><td class="att-tech">T1048.001</td><td class="att-tactic">Exfiltration</td><td>Network: SRV-DC-01 → 185.220.101.47:53, 32KB DNS traffic</td></tr>
+      </tbody>
+    </table>
+    <div class="challenge-box">
+      <div class="challenge-title">⚡ Challenge: Calculate Dwell Time</div>
+      <div class="challenge-body">Dwell time = time from initial compromise to detection. Add a <code>calculate_dwell_time(timeline)</code> function that finds the earliest suspicious event and the first detection event (first EventID 4625 failure that triggered investigation). Append the dwell time to the executive summary in the IR report.</div>
+    </div>
+  </div>
+
+  <!-- LAB 5 -->
+  <div class="lab-section" id="lab5">
+    <div class="lab-header">
+      <div class="lab-header-left">
+        <div class="lab-badge" style="background:rgba(255,184,0,.07);border:1px solid rgba(255,184,0,.2);color:var(--amber);">LAB-05 // PHISHING ANALYSIS</div>
+        <h2 class="lab-h2"><span>Email Forensics</span> — 3 Phishing Campaigns</h2>
+        <p class="lab-objective">Triage 3 phishing emails: a Microsoft 365 credential harvest, a macro-dropper invoice, and a BEC wire fraud. Analyze headers, extract IOCs, classify campaigns, and trigger automated response playbooks.</p>
+        <div class="run-cmd"><span>$</span> python lab5_phishing_analysis.py</div>
+      </div>
+    </div>
+    <div class="exercises-grid">
+      <div class="exercise-card">
+        <div class="ex-num">// EMAIL-001</div>
+        <div class="ex-title">Credential Harvesting — M365 Lure</div>
+        <div class="ex-body">Sender: <code>security-alert@micros0ft-verify.com</code>. SPF FAIL, DKIM NONE, DMARC FAIL. Body contains a lookalike login URL with base64-encoded user token. Reply-To redirects to <code>.ru</code> domain. Classification: CREDENTIAL_HARVESTING. Score: 85/100 (CRITICAL).</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-num">// EMAIL-002</div>
+        <div class="ex-title">Malware Delivery — Invoice Lure</div>
+        <div class="ex-body">Attachment: <code>Invoice_INV20250315.doc</code> (MD5 matches known Emotet macro dropper). Sender domain spoofs a legitimate vendor with <code>.evil.ru</code> suffix. SPF SOFTFAIL. Score: 90/100 (CRITICAL). Response: endpoint hash hunt triggered across fleet.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-num">// EMAIL-003</div>
+        <div class="ex-title">BEC Wire Fraud — CEO Impersonation</div>
+        <div class="ex-body">Sender spoofs CEO with <code>.phishing-domains.xyz</code>. Requests $127,500 wire transfer "urgently." Bank account number extracted (4532015112830366). Reply-To redirects to attacker Gmail. Score: 95/100 (CRITICAL). Finance team alert fired immediately.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-num">// EXERCISE 5</div>
+        <div class="ex-title">Automated Response Playbook</div>
+        <div class="ex-body">For each email: quarantine email → block sender domain → block malicious IPs at firewall → block URLs at proxy → trigger endpoint hash hunt (malware only) → alert finance (BEC only) → notify recipient with awareness tip. All actions logged with timestamps for audit trail.</div>
+      </div>
+    </div>
+    <div class="challenge-box">
+      <div class="challenge-title">⚡ Challenge: DKIM Signature Validation</div>
+      <div class="challenge-body">Add a <code>verify_dkim(email)</code> function that parses the <code>DKIM-Signature</code> header (if present), extracts the <code>bh</code> (body hash) field, independently computes <code>SHA-256(canonicalized_body)</code>, and compares. If they don't match, the email has been tampered with in transit.</div>
+    </div>
+  </div>
+
+  <!-- LAB 6 -->
+  <div class="lab-section" id="lab6">
+    <div class="lab-header">
+      <div class="lab-header-left">
+        <div class="lab-badge" style="background:rgba(255,45,85,.07);border:1px solid rgba(255,45,85,.2);color:var(--red);">LAB-06 // PENETRATION TESTING</div>
+        <h2 class="lab-h2"><span>PTES</span> — Metasploitable 2 Full Kill Chain</h2>
+        <p class="lab-objective">Follow the Penetration Testing Execution Standard against a Metasploitable 2 topology. Recon 13 open services, simulate 7 CVE exploits, post-exploit to harvest credentials, and deliver a professional pentest report. Run against your live VM for real hands-on practice.</p>
+        <div class="run-cmd"><span>$</span> python lab6_penetration_testing.py</div>
+      </div>
+    </div>
+    <table class="attack-table">
+      <thead><tr><th>CVE</th><th>CVSS</th><th>Port / Service</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td class="att-tech">CVE-2011-2523</td><td>10.0</td><td>21 — vsftpd 2.3.4</td><td>Root shell via backdoor on :6200</td></tr>
+        <tr><td class="att-tech">CVE-2007-2447</td><td>10.0</td><td>445 — Samba MS-RPC</td><td>Root shell via usermap_script</td></tr>
+        <tr><td class="att-tech">CVE-2010-2075</td><td>10.0</td><td>6667 — UnrealIRCd</td><td>Root shell via IRC backdoor</td></tr>
+        <tr><td class="att-tech">CVE-2004-2687</td><td>9.3</td><td>3632 — distccd</td><td>daemon shell → sudo root</td></tr>
+        <tr><td class="att-tech">CVE-2007-3280</td><td>9.0</td><td>5432 — PostgreSQL</td><td>Meterpreter as postgres</td></tr>
+        <tr><td class="att-tech">CVE-2009-3548</td><td>7.5</td><td>8180 — Tomcat</td><td>Shell via default creds + WAR upload</td></tr>
+        <tr><td class="att-tech">N/A</td><td>8.8</td><td>80 — DVWA</td><td>Full DB dump via SQLmap</td></tr>
+      </tbody>
+    </table>
+    <div class="challenge-box">
+      <div class="challenge-title">⚡ Live Lab: Point at Metasploitable 2 (10.56.237.233)</div>
+      <div class="challenge-body">Open <code>msfconsole</code> and run the actual modules shown in Exercise 3. Challenge: exploit <code>distccd</code> (port 3632) and escalate to root using the <code>sudo -l</code> finding from post-exploitation. Document each step in the findings report template at <code>lab6_output/pentest_report_metasploitable2.txt</code>.</div>
+    </div>
+  </div>
+
+</div>
+
+  <!-- LAB 7 -->
+  <div class="lab-section" id="lab7">
+    <div class="lab-header">
+      <div class="lab-header-left">
+        <div class="lab-badge" style="background:rgba(123,47,255,.08);border:1px solid rgba(123,47,255,.2);color:var(--neon2);">LAB-07 // ZERO TRUST &amp; NETWORK SECURITY</div>
+        <h2 class="lab-h2"><span>Zero Trust Architecture</span> — Design, Enforce &amp; Validate</h2>
+        <p class="lab-objective">Design a 3-VLAN Zero Trust network lab (Dev / Prod / Management). Build a default-deny policy engine that enforces mTLS and identity for every flow. Simulate 6 attacker lateral movement scenarios and score your architecture against NIST SP 800-207 and the CISA Zero Trust Maturity Model.</p>
+        <div class="run-cmd"><span>$</span> python lab7_zero_trust_network.py</div>
+      </div>
+    </div>
+    <div class="exercises-grid">
+      <div class="exercise-card">
+        <div class="ex-num">// EXERCISE 1</div>
+        <div class="ex-title">Zero Trust Topology Design</div>
+        <div class="ex-body">Model three network zones: <code>VLAN_10_DEV</code> (trust=low), <code>VLAN_20_PROD</code> (trust=high), and <code>VLAN_30_MGMT</code> (trust=critical). Each zone has a defined subnet and host roster. The key principle: no zone implicitly trusts any other — even prod-web-01 cannot reach prod-db-01 without an explicit policy.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-num">// EXERCISE 2</div>
+        <div class="ex-title">Default-Deny Policy Engine</div>
+        <div class="ex-body">Six explicit <code>ALLOW</code> policies are defined. Every other flow hits the default <code>DENY</code>. Each policy enforces: source zone/host, destination, port, whether mTLS cert is required, and which service identity must be presented. The engine evaluates all conditions in sequence and logs every decision for audit.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-num">// EXERCISE 3</div>
+        <div class="ex-title">mTLS Certificate Design Review</div>
+        <div class="ex-body">The lab analyzes your PKI design: CA key algorithm (ECDSA P-384), service cert TTL (all ≤24h), identity cert TTL for humans (≤8h), and MFA requirement for human certs. Short-lived certs reduce blast radius if a cert is stolen — the attacker's window is capped at the TTL.</div>
+      </div>
+      <div class="exercise-card">
+        <div class="ex-num">// EXERCISE 4</div>
+        <div class="ex-title">Lateral Movement Simulation</div>
+        <div class="ex-body">Six attack scenarios test your policy engine. Notably: an attacker who <em>steals the svc-web cert</em> still gets DENIED when trying to hit the database — because the DB policy requires <code>identity=svc-app</code>, not <code>svc-web</code>. Identity-aware policies stop credential theft from enabling lateral movement.</div>
+      </div>
+    </div>
+    <div class="attack-table" style="margin-top:24px;">
+      <table class="attack-table">
+        <thead><tr><th>Scenario</th><th>Attacker Has</th><th>Target</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td>Direct Dev → Prod DB</td><td>Foothold on dev-ws-01</td><td>prod-db-01:5432</td><td class="att-tech">DENY — no policy</td></tr>
+          <tr><td>Dev → Prod Web HTTP</td><td>Developer identity</td><td>prod-web-01:80</td><td class="att-tech">DENY — no policy</td></tr>
+          <tr><td>Dev → SIEM (log replay)</td><td>Valid mTLS cert</td><td>mgmt-siem:514</td><td class="att-tech">DENY — wrong src zone</td></tr>
+          <tr><td>Stolen svc-web → DB</td><td>svc-web cert (stolen)</td><td>prod-db-01:5432</td><td class="att-tech">DENY — identity mismatch</td></tr>
+          <tr><td>Legitimate app → DB</td><td>svc-app cert + identity</td><td>prod-db-01:5432</td><td style="color:var(--neon3)">ALLOW ✓</td></tr>
+          <tr><td>Bastion → Prod SSH</td><td>ops-engineer + MFA cert</td><td>any prod:22</td><td style="color:var(--neon3)">ALLOW ✓</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="challenge-box">
+      <div class="challenge-title">⚡ Challenge 1: Push ZT Score to 100%</div>
+      <div class="challenge-body">The current architecture scores 92.9% — the missing check is OCSP stapling for certificate revocation. Add an <code>ocsp_stapling_enabled</code> flag to the cert inventory and update <code>ZT_PRINCIPLES</code> to check it. Re-run to hit 100% maturity.</div>
+    </div>
+    <div class="challenge-box" style="margin-top:16px;">
+      <div class="challenge-title">⚡ Challenge 2: JWT Replay Attack</div>
+      <div class="challenge-body">Add a 7th lateral movement scenario where the attacker replays a captured JWT token (no mTLS cert) to access prod-app-01. The policy engine should deny it because mTLS cert is required. Then add a <code>token_exp_minutes</code> field and show how a 15-minute expiry window limits the attack surface even if the token is captured.</div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-logo">KOUSIK GUNASEKARAN</div>
+  <div class="footer-copy">&copy; 2026 &mdash; CYBERSECURITY LAB GUIDE &mdash; NEW YORK, USA</div>
+</footer>
+
+</body>
+</html>

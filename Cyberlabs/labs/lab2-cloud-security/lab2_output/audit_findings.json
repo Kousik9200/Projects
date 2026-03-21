@@ -1,0 +1,300 @@
+{
+  "findings": [
+    {
+      "id": "IAM-001",
+      "cis": "CIS 1.5",
+      "severity": "CRITICAL",
+      "title": "Root account MFA is disabled",
+      "resource": "root account",
+      "fix": "Enable hardware MFA on root account. Lock away root credentials after setup.",
+      "effort": "15 min",
+      "risk_score": 19.5
+    },
+    {
+      "id": "IAM-004-DevFullAccess",
+      "cis": "CIS 1.16",
+      "severity": "CRITICAL",
+      "title": "Policy 'DevFullAccess' grants Action:* Resource:* (full admin)",
+      "resource": "iam/policy/DevFullAccess",
+      "fix": "Scope policy to minimum required actions and specific resource ARNs.",
+      "effort": "2\u20134 hours",
+      "risk_score": 19.5
+    },
+    {
+      "id": "S3-001-prod-customer-pi",
+      "cis": "CIS 2.1.5",
+      "severity": "CRITICAL",
+      "title": "S3 bucket 'prod-customer-pii' has no public access block",
+      "resource": "arn:aws:s3:::prod-customer-pii",
+      "fix": "Enable all 4 S3 Block Public Access settings. Audit ACLs and bucket policies.",
+      "effort": "5 min",
+      "risk_score": 18.0
+    },
+    {
+      "id": "SG-002-sg-001-22",
+      "cis": "CIS 5.2",
+      "severity": "CRITICAL",
+      "title": "SG 'prod-web' exposes SSH (port 22) to 0.0.0.0/0",
+      "resource": "ec2/security-group/sg-001",
+      "fix": "Restrict SSH to specific IP ranges or route through VPN/bastion host. Never expose to 0.0.0.0/0.",
+      "effort": "5 min",
+      "risk_score": 18.0
+    },
+    {
+      "id": "SG-002-sg-002-3306",
+      "cis": "CIS 5.2",
+      "severity": "CRITICAL",
+      "title": "SG 'prod-db' exposes MySQL (port 3306) to 0.0.0.0/0",
+      "resource": "ec2/security-group/sg-002",
+      "fix": "Restrict MySQL to specific IP ranges or route through VPN/bastion host. Never expose to 0.0.0.0/0.",
+      "effort": "5 min",
+      "risk_score": 18.0
+    },
+    {
+      "id": "SG-002-sg-003-22",
+      "cis": "CIS 5.2",
+      "severity": "CRITICAL",
+      "title": "SG 'mgmt' exposes SSH (port 22) to 0.0.0.0/0",
+      "resource": "ec2/security-group/sg-003",
+      "fix": "Restrict SSH to specific IP ranges or route through VPN/bastion host. Never expose to 0.0.0.0/0.",
+      "effort": "5 min",
+      "risk_score": 18.0
+    },
+    {
+      "id": "SG-002-sg-003-3389",
+      "cis": "CIS 5.2",
+      "severity": "CRITICAL",
+      "title": "SG 'mgmt' exposes RDP (port 3389) to 0.0.0.0/0",
+      "resource": "ec2/security-group/sg-003",
+      "fix": "Restrict RDP to specific IP ranges or route through VPN/bastion host. Never expose to 0.0.0.0/0.",
+      "effort": "5 min",
+      "risk_score": 18.0
+    },
+    {
+      "id": "SG-001-sg-005",
+      "cis": "CIS 5.2",
+      "severity": "CRITICAL",
+      "title": "SG 'old-test' (sg-005) allows ALL inbound traffic from 0.0.0.0/0",
+      "resource": "ec2/security-group/sg-005",
+      "fix": "Delete the all-traffic rule. Add specific rules for only required ports and sources.",
+      "effort": "10 min",
+      "risk_score": 18.0
+    },
+    {
+      "id": "IAM-002-bob",
+      "cis": "CIS 1.10",
+      "severity": "HIGH",
+      "title": "Console user 'bob' has no MFA",
+      "resource": "iam/user/bob",
+      "fix": "Enforce MFA for bob. Apply IAM policy denying all actions without MFA.",
+      "effort": "10 min",
+      "risk_score": 14.6
+    },
+    {
+      "id": "SG-002-sg-002-5432",
+      "cis": "CIS 5.2",
+      "severity": "HIGH",
+      "title": "SG 'prod-db' exposes PostgreSQL (port 5432) to 0.0.0.0/0",
+      "resource": "ec2/security-group/sg-002",
+      "fix": "Restrict PostgreSQL to specific IP ranges or route through VPN/bastion host. Never expose to 0.0.0.0/0.",
+      "effort": "5 min",
+      "risk_score": 13.5
+    },
+    {
+      "id": "IAM-003-bob",
+      "cis": "CIS 1.14",
+      "severity": "MEDIUM",
+      "title": "Access key for 'bob' is 102 days old",
+      "resource": "iam/user/bob",
+      "fix": "Rotate key for bob. Create new \u2192 update apps \u2192 disable old \u2192 delete.",
+      "effort": "30 min",
+      "risk_score": 9.8
+    },
+    {
+      "id": "IAM-003-ci-bot",
+      "cis": "CIS 1.14",
+      "severity": "MEDIUM",
+      "title": "Access key for 'ci-bot' is 134 days old",
+      "resource": "iam/user/ci-bot",
+      "fix": "Rotate key for ci-bot. Create new \u2192 update apps \u2192 disable old \u2192 delete.",
+      "effort": "30 min",
+      "risk_score": 9.8
+    },
+    {
+      "id": "S3-002-internal-docs",
+      "cis": "CIS 2.1.1",
+      "severity": "MEDIUM",
+      "title": "S3 bucket 'internal-docs' has no default encryption",
+      "resource": "arn:aws:s3:::internal-docs",
+      "fix": "Enable SSE-S3 or SSE-KMS as default encryption. Use KMS CMK for PII buckets.",
+      "effort": "5 min",
+      "risk_score": 9.0
+    },
+    {
+      "id": "S3-002-dev-scratch",
+      "cis": "CIS 2.1.1",
+      "severity": "MEDIUM",
+      "title": "S3 bucket 'dev-scratch' has no default encryption",
+      "resource": "arn:aws:s3:::dev-scratch",
+      "fix": "Enable SSE-S3 or SSE-KMS as default encryption. Use KMS CMK for PII buckets.",
+      "effort": "5 min",
+      "risk_score": 9.0
+    },
+    {
+      "id": "CT-001",
+      "cis": "CIS 3.1",
+      "severity": "MEDIUM",
+      "title": "CloudTrail is not multi-region",
+      "resource": "aws/cloudtrail",
+      "fix": "Update trail: aws cloudtrail update-trail --name <trail> --is-multi-region-trail",
+      "effort": "5 min",
+      "risk_score": 7.5
+    },
+    {
+      "id": "CT-002",
+      "cis": "CIS 3.2",
+      "severity": "MEDIUM",
+      "title": "CloudTrail log file validation is disabled",
+      "resource": "aws/cloudtrail",
+      "fix": "Enable: aws cloudtrail update-trail --name <trail> --enable-log-file-validation",
+      "effort": "2 min",
+      "risk_score": 7.5
+    },
+    {
+      "id": "S3-003-internal-docs",
+      "cis": "CIS 2.6",
+      "severity": "LOW",
+      "title": "S3 bucket 'internal-docs' has no access logging",
+      "resource": "arn:aws:s3:::internal-docs",
+      "fix": "Enable server access logging to a central security bucket.",
+      "effort": "5 min",
+      "risk_score": 4.5
+    },
+    {
+      "id": "S3-003-dev-scratch",
+      "cis": "CIS 2.6",
+      "severity": "LOW",
+      "title": "S3 bucket 'dev-scratch' has no access logging",
+      "resource": "arn:aws:s3:::dev-scratch",
+      "fix": "Enable server access logging to a central security bucket.",
+      "effort": "5 min",
+      "risk_score": 4.5
+    }
+  ],
+  "plan": {
+    "generated_at": "2026-03-20T20:39:27.782802+00:00",
+    "total_findings": 18,
+    "phases": {
+      "IMMEDIATE (24h)": {
+        "count": 8,
+        "items": [
+          {
+            "title": "Root account MFA is disabled",
+            "score": 19.5,
+            "effort": "15 min"
+          },
+          {
+            "title": "Policy 'DevFullAccess' grants Action:* Resource:* (full admin)",
+            "score": 19.5,
+            "effort": "2\u20134 hours"
+          },
+          {
+            "title": "S3 bucket 'prod-customer-pii' has no public access block",
+            "score": 18.0,
+            "effort": "5 min"
+          },
+          {
+            "title": "SG 'prod-web' exposes SSH (port 22) to 0.0.0.0/0",
+            "score": 18.0,
+            "effort": "5 min"
+          },
+          {
+            "title": "SG 'prod-db' exposes MySQL (port 3306) to 0.0.0.0/0",
+            "score": 18.0,
+            "effort": "5 min"
+          },
+          {
+            "title": "SG 'mgmt' exposes SSH (port 22) to 0.0.0.0/0",
+            "score": 18.0,
+            "effort": "5 min"
+          },
+          {
+            "title": "SG 'mgmt' exposes RDP (port 3389) to 0.0.0.0/0",
+            "score": 18.0,
+            "effort": "5 min"
+          },
+          {
+            "title": "SG 'old-test' (sg-005) allows ALL inbound traffic from 0.0.0.0/0",
+            "score": 18.0,
+            "effort": "10 min"
+          }
+        ]
+      },
+      "THIS WEEK (7d)": {
+        "count": 2,
+        "items": [
+          {
+            "title": "Console user 'bob' has no MFA",
+            "score": 14.6,
+            "effort": "10 min"
+          },
+          {
+            "title": "SG 'prod-db' exposes PostgreSQL (port 5432) to 0.0.0.0/0",
+            "score": 13.5,
+            "effort": "5 min"
+          }
+        ]
+      },
+      "THIS MONTH (30d)": {
+        "count": 6,
+        "items": [
+          {
+            "title": "Access key for 'bob' is 102 days old",
+            "score": 9.8,
+            "effort": "30 min"
+          },
+          {
+            "title": "Access key for 'ci-bot' is 134 days old",
+            "score": 9.8,
+            "effort": "30 min"
+          },
+          {
+            "title": "S3 bucket 'internal-docs' has no default encryption",
+            "score": 9.0,
+            "effort": "5 min"
+          },
+          {
+            "title": "S3 bucket 'dev-scratch' has no default encryption",
+            "score": 9.0,
+            "effort": "5 min"
+          },
+          {
+            "title": "CloudTrail is not multi-region",
+            "score": 7.5,
+            "effort": "5 min"
+          },
+          {
+            "title": "CloudTrail log file validation is disabled",
+            "score": 7.5,
+            "effort": "2 min"
+          }
+        ]
+      },
+      "BACKLOG": {
+        "count": 2,
+        "items": [
+          {
+            "title": "S3 bucket 'internal-docs' has no access logging",
+            "score": 4.5,
+            "effort": "5 min"
+          },
+          {
+            "title": "S3 bucket 'dev-scratch' has no access logging",
+            "score": 4.5,
+            "effort": "5 min"
+          }
+        ]
+      }
+    }
+  }
+}

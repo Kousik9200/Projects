@@ -1,0 +1,6 @@
+| comment: Mimikatz Token Impersonation via SeDebugPrivilege
+| comment: ATT&CK: attack.privilege_escalation, attack.t1134.001, attack.credential_access, attack.t1003.001
+index=windows EventCode=4688 OR EventCode=1
+| search ((Image="*\mimikatz.exe" OR Image="*\mimilib.dll")) OR ((CommandLine="*privilege::debug*" OR CommandLine="*sekurlsa::logonpasswords*" OR CommandLine="*lsadump::sam*" OR CommandLine="*token::elevate*")) OR ((ParentImage="*\cmd.exe" OR ParentImage="*\powershell.exe"))
+| table _time, host, user, CommandLine, Image, ParentImage, EventCode
+| sort -_time

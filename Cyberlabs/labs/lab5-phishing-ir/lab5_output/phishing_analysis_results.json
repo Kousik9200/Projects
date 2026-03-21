@@ -1,0 +1,227 @@
+[
+  {
+    "email_id": "EMAIL-001",
+    "subject": "URGENT: Your Microsoft 365 Account Will Be Suspended",
+    "header_analysis": {
+      "header_score": 100,
+      "findings": [
+        "SPF FAIL: sender IP not authorized by domain",
+        "DKIM NONE: message not cryptographically signed by sender",
+        "DMARC FAIL: domain policy not satisfied \u2014 high phishing indicator",
+        "Reply-To mismatch: replies go to 'suspicious-domain.ru' not 'micros0ft-verify.com'",
+        "Lookalike domain detected in sender: 'security-alert@micros0ft-verify.com'"
+      ]
+    },
+    "iocs": {
+      "urls": [
+        "http://micros0ft-login.serverfree.com/verify?user=bob@company.com&token=dXNlcjoxMjM0NTY=",
+        "http://micros0ft-login.serverfree.com/unsubscribe"
+      ],
+      "domains": [
+        "micros0ft-login.serverfree.com",
+        "micros0ft-login.serverfree.com"
+      ],
+      "ips": [
+        "203.0.113.42"
+      ],
+      "hashes": {},
+      "encoded_strings": [],
+      "bank_accounts": []
+    },
+    "classification": {
+      "score": 100,
+      "level": "CRITICAL",
+      "category": "credential_harvesting",
+      "response": "Block URL, quarantine email, notify recipient, reset credentials if clicked",
+      "category_scores": {
+        "credential_harvesting": 5,
+        "malware_delivery": 0,
+        "bec_fraud": 1
+      }
+    },
+    "response": {
+      "response_actions": [
+        {
+          "action": "QUARANTINE_EMAIL",
+          "target": "EMAIL-001",
+          "status": "EXECUTED",
+          "timestamp": "2026-03-21T00:50:33.114791+00:00"
+        },
+        {
+          "action": "BLOCK_SENDER_DOMAIN",
+          "target": "micros0ft-verify.com",
+          "status": "EXECUTED",
+          "timestamp": "2026-03-21T00:50:33.114791+00:00"
+        },
+        {
+          "action": "BLOCK_IP_FIREWALL",
+          "target": "203.0.113.42",
+          "status": "EXECUTED",
+          "timestamp": "2026-03-21T00:50:33.114791+00:00"
+        },
+        {
+          "action": "BLOCK_URL_PROXY",
+          "target": "http://micros0ft-login.serverfree.com/verify?user=bob@compan...",
+          "status": "EXECUTED",
+          "timestamp": "2026-03-21T00:50:33.114791+00:00"
+        },
+        {
+          "action": "BLOCK_URL_PROXY",
+          "target": "http://micros0ft-login.serverfree.com/unsubscribe",
+          "status": "EXECUTED",
+          "timestamp": "2026-03-21T00:50:33.114791+00:00"
+        },
+        {
+          "action": "NOTIFY_RECIPIENT",
+          "target": "bob@company.com",
+          "status": "EMAIL_SENT",
+          "timestamp": "2026-03-21T00:50:33.114791+00:00"
+        }
+      ],
+      "total": 6
+    }
+  },
+  {
+    "email_id": "EMAIL-002",
+    "subject": "Invoice #INV-20250315 - Payment Required",
+    "header_analysis": {
+      "header_score": 80,
+      "findings": [
+        "SPF SOFTFAIL: sender IP not authorized by domain",
+        "DKIM FAIL: message not cryptographically signed by sender",
+        "DMARC FAIL: domain policy not satisfied \u2014 high phishing indicator",
+        "Reply-To mismatch: replies go to 'evil.ru' not 'legit-vendor.com.evil.ru'"
+      ]
+    },
+    "iocs": {
+      "urls": [],
+      "domains": [],
+      "ips": [
+        "198.51.100.87"
+      ],
+      "hashes": {
+        "9e2e3a00b3d94e67c9b1d5ad80c8c8d2": "Invoice_INV20250315.doc"
+      },
+      "encoded_strings": [],
+      "bank_accounts": []
+    },
+    "classification": {
+      "score": 100,
+      "level": "CRITICAL",
+      "category": "malware_delivery",
+      "response": "Block attachment hash, quarantine email, scan recipient endpoint, detonate sample",
+      "category_scores": {
+        "credential_harvesting": 0,
+        "malware_delivery": 1,
+        "bec_fraud": 1
+      }
+    },
+    "response": {
+      "response_actions": [
+        {
+          "action": "QUARANTINE_EMAIL",
+          "target": "EMAIL-002",
+          "status": "EXECUTED",
+          "timestamp": "2026-03-21T00:50:33.117541+00:00"
+        },
+        {
+          "action": "BLOCK_SENDER_DOMAIN",
+          "target": "legit-vendor.com.evil.ru",
+          "status": "EXECUTED",
+          "timestamp": "2026-03-21T00:50:33.117541+00:00"
+        },
+        {
+          "action": "BLOCK_IP_FIREWALL",
+          "target": "198.51.100.87",
+          "status": "EXECUTED",
+          "timestamp": "2026-03-21T00:50:33.117541+00:00"
+        },
+        {
+          "action": "ENDPOINT_HASH_HUNT",
+          "target": "9e2e3a00b3d94e67c9b1d5ad80c8c8d2 (Invoice_INV20250315.doc)",
+          "status": "TRIGGERED",
+          "timestamp": "2026-03-21T00:50:33.117541+00:00"
+        },
+        {
+          "action": "NOTIFY_RECIPIENT",
+          "target": "alice@company.com",
+          "status": "EMAIL_SENT",
+          "timestamp": "2026-03-21T00:50:33.117541+00:00"
+        }
+      ],
+      "total": 5
+    }
+  },
+  {
+    "email_id": "EMAIL-003",
+    "subject": "Q1 2025 Board Report \u2014 Confidential",
+    "header_analysis": {
+      "header_score": 95,
+      "findings": [
+        "SPF FAIL: sender IP not authorized by domain",
+        "DKIM NONE: message not cryptographically signed by sender",
+        "DMARC FAIL: domain policy not satisfied \u2014 high phishing indicator",
+        "Reply-To mismatch: replies go to 'gmail.com' not 'company.com.phishing-domains.xyz'"
+      ]
+    },
+    "iocs": {
+      "urls": [],
+      "domains": [],
+      "ips": [
+        "45.33.32.156"
+      ],
+      "hashes": {},
+      "encoded_strings": [],
+      "bank_accounts": [
+        "4532015112830366"
+      ]
+    },
+    "classification": {
+      "score": 100,
+      "level": "CRITICAL",
+      "category": "bec_fraud",
+      "response": "Alert finance team immediately, verify via phone, block sender domain, preserve evidence",
+      "category_scores": {
+        "credential_harvesting": 1,
+        "malware_delivery": 0,
+        "bec_fraud": 5
+      }
+    },
+    "response": {
+      "response_actions": [
+        {
+          "action": "QUARANTINE_EMAIL",
+          "target": "EMAIL-003",
+          "status": "EXECUTED",
+          "timestamp": "2026-03-21T00:50:33.119953+00:00"
+        },
+        {
+          "action": "BLOCK_SENDER_DOMAIN",
+          "target": "company.com.phishing-domains.xyz",
+          "status": "EXECUTED",
+          "timestamp": "2026-03-21T00:50:33.119953+00:00"
+        },
+        {
+          "action": "BLOCK_IP_FIREWALL",
+          "target": "45.33.32.156",
+          "status": "EXECUTED",
+          "timestamp": "2026-03-21T00:50:33.119953+00:00"
+        },
+        {
+          "action": "ALERT_FINANCE_TEAM",
+          "target": "finance@company.com",
+          "status": "NOTIFICATION_SENT",
+          "message": "Potential BEC \u2014 do NOT process any wire transfer requests from this sender",
+          "timestamp": "2026-03-21T00:50:33.119953+00:00"
+        },
+        {
+          "action": "NOTIFY_RECIPIENT",
+          "target": "finance@company.com",
+          "status": "EMAIL_SENT",
+          "timestamp": "2026-03-21T00:50:33.119953+00:00"
+        }
+      ],
+      "total": 5
+    }
+  }
+]

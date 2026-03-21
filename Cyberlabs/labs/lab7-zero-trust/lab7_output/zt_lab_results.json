@@ -1,0 +1,303 @@
+{
+  "topology": {
+    "vlans": {
+      "VLAN_10_DEV": {
+        "subnet": "10.10.10.0/24",
+        "zone": "development",
+        "trust_level": "low",
+        "hosts": [
+          {
+            "name": "dev-ws-01",
+            "ip": "10.10.10.10",
+            "role": "developer_workstation"
+          },
+          {
+            "name": "dev-ws-02",
+            "ip": "10.10.10.11",
+            "role": "developer_workstation"
+          },
+          {
+            "name": "dev-api-01",
+            "ip": "10.10.10.50",
+            "role": "dev_api_server"
+          }
+        ]
+      },
+      "VLAN_20_PROD": {
+        "subnet": "10.20.20.0/24",
+        "zone": "production",
+        "trust_level": "high",
+        "hosts": [
+          {
+            "name": "prod-web-01",
+            "ip": "10.20.20.10",
+            "role": "web_server"
+          },
+          {
+            "name": "prod-app-01",
+            "ip": "10.20.20.20",
+            "role": "app_server"
+          },
+          {
+            "name": "prod-db-01",
+            "ip": "10.20.20.30",
+            "role": "database"
+          },
+          {
+            "name": "prod-cache-01",
+            "ip": "10.20.20.40",
+            "role": "cache_server"
+          }
+        ]
+      },
+      "VLAN_30_MGMT": {
+        "subnet": "10.30.30.0/24",
+        "zone": "management",
+        "trust_level": "critical",
+        "hosts": [
+          {
+            "name": "mgmt-bastion",
+            "ip": "10.30.30.5",
+            "role": "bastion_host"
+          },
+          {
+            "name": "mgmt-siem",
+            "ip": "10.30.30.10",
+            "role": "siem_server"
+          },
+          {
+            "name": "mgmt-ca",
+            "ip": "10.30.30.20",
+            "role": "certificate_authority"
+          },
+          {
+            "name": "mgmt-iam",
+            "ip": "10.30.30.30",
+            "role": "iam_server"
+          }
+        ]
+      }
+    },
+    "internet_gateway": "203.0.113.1",
+    "identity_aware_proxy": "10.30.30.100"
+  },
+  "policies": [
+    {
+      "id": "P-001",
+      "name": "Internet to Web Server",
+      "src_zone": "internet",
+      "dst_zone": "production",
+      "dst_host": "prod-web-01",
+      "dst_port": 443,
+      "protocol": "HTTPS",
+      "mtls_required": false,
+      "identity_required": false,
+      "action": "ALLOW",
+      "justification": "Public web traffic \u2014 TLS only, no mTLS for unauthenticated users"
+    },
+    {
+      "id": "P-002",
+      "name": "Web Server to App Server",
+      "src_zone": "production",
+      "src_host": "prod-web-01",
+      "dst_zone": "production",
+      "dst_host": "prod-app-01",
+      "dst_port": 8080,
+      "protocol": "HTTP",
+      "mtls_required": true,
+      "identity_required": true,
+      "required_identity": "svc-web",
+      "action": "ALLOW",
+      "justification": "East-west mTLS: web service cert required, no implicit VLAN trust"
+    },
+    {
+      "id": "P-003",
+      "name": "App Server to Database",
+      "src_zone": "production",
+      "src_host": "prod-app-01",
+      "dst_zone": "production",
+      "dst_host": "prod-db-01",
+      "dst_port": 5432,
+      "protocol": "PostgreSQL",
+      "mtls_required": true,
+      "identity_required": true,
+      "required_identity": "svc-app",
+      "action": "ALLOW",
+      "justification": "Only prod-app with svc-app cert may reach DB. No dev or mgmt direct DB access."
+    },
+    {
+      "id": "P-004",
+      "name": "Bastion to Production SSH",
+      "src_zone": "management",
+      "src_host": "mgmt-bastion",
+      "dst_zone": "production",
+      "dst_port": 22,
+      "protocol": "SSH",
+      "mtls_required": true,
+      "identity_required": true,
+      "required_identity": "ops-engineer",
+      "action": "ALLOW",
+      "justification": "Admins may SSH to prod only through bastion with MFA-validated identity"
+    },
+    {
+      "id": "P-005",
+      "name": "SIEM Log Collection",
+      "src_zone": "management",
+      "src_host": "mgmt-siem",
+      "dst_zone": "any",
+      "dst_port": 514,
+      "protocol": "Syslog/TLS",
+      "mtls_required": true,
+      "identity_required": true,
+      "required_identity": "svc-siem",
+      "action": "ALLOW",
+      "justification": "SIEM pulls logs from all zones using dedicated svc-siem certificate"
+    },
+    {
+      "id": "P-006",
+      "name": "Dev Workstation to Dev API",
+      "src_zone": "development",
+      "dst_zone": "development",
+      "dst_host": "dev-api-01",
+      "dst_port": 8080,
+      "protocol": "HTTP",
+      "mtls_required": false,
+      "identity_required": true,
+      "required_identity": "developer",
+      "action": "ALLOW",
+      "justification": "Dev zone self-contained. Identity token required, mTLS optional in dev."
+    }
+  ],
+  "cert_findings": [
+    {
+      "level": "PASS",
+      "msg": "CA key algorithm is strong: ECDSA P-384"
+    },
+    {
+      "level": "PASS",
+      "msg": "Service cert 'svc-web' TTL: 24h \u2713"
+    },
+    {
+      "level": "PASS",
+      "msg": "Service cert 'svc-app' TTL: 24h \u2713"
+    },
+    {
+      "level": "PASS",
+      "msg": "Service cert 'svc-siem' TTL: 24h \u2713"
+    },
+    {
+      "level": "PASS",
+      "msg": "Service cert 'svc-db' TTL: 24h \u2713"
+    }
+  ],
+  "lateral_movement_results": [
+    {
+      "scenario": "Attacker pivots from Dev to Prod DB (direct)",
+      "expected": "DENY",
+      "result": {
+        "policy": "DEFAULT",
+        "action": "DENY",
+        "reason": "No matching policy found \u2014 Zero Trust default DENY",
+        "request": {
+          "src_zone": "development",
+          "src_host": "dev-ws-01",
+          "dst_host": "prod-db-01",
+          "dst_port": 5432,
+          "identity": null,
+          "has_mtls_cert": false
+        }
+      }
+    },
+    {
+      "scenario": "Attacker pivots from Dev to Prod Web on port 80",
+      "expected": "DENY",
+      "result": {
+        "policy": "DEFAULT",
+        "action": "DENY",
+        "reason": "No matching policy found \u2014 Zero Trust default DENY",
+        "request": {
+          "src_zone": "development",
+          "src_host": "dev-ws-01",
+          "dst_host": "prod-web-01",
+          "dst_port": 80,
+          "identity": "developer",
+          "has_mtls_cert": false
+        }
+      }
+    },
+    {
+      "scenario": "Attacker pivots to Management SIEM",
+      "expected": "DENY",
+      "result": {
+        "policy": "DEFAULT",
+        "action": "DENY",
+        "reason": "No matching policy found \u2014 Zero Trust default DENY",
+        "request": {
+          "src_zone": "development",
+          "src_host": "dev-ws-01",
+          "dst_host": "mgmt-siem",
+          "dst_port": 514,
+          "identity": "developer",
+          "has_mtls_cert": true
+        }
+      }
+    },
+    {
+      "scenario": "Attacker stolen svc-web cert tries to hit DB",
+      "expected": "DENY",
+      "result": {
+        "policy": "DEFAULT",
+        "action": "DENY",
+        "reason": "No matching policy found \u2014 Zero Trust default DENY",
+        "request": {
+          "src_zone": "production",
+          "src_host": "prod-web-01",
+          "dst_host": "prod-db-01",
+          "dst_port": 5432,
+          "identity": "svc-web",
+          "has_mtls_cert": true
+        }
+      }
+    },
+    {
+      "scenario": "Legitimate app \u2192 db flow",
+      "expected": "ALLOW",
+      "result": {
+        "policy": "P-003",
+        "action": "ALLOW",
+        "reason": "Only prod-app with svc-app cert may reach DB. No dev or mgmt direct DB access.",
+        "request": {
+          "src_zone": "production",
+          "src_host": "prod-app-01",
+          "dst_host": "prod-db-01",
+          "dst_port": 5432,
+          "identity": "svc-app",
+          "has_mtls_cert": true
+        }
+      }
+    },
+    {
+      "scenario": "Legitimate bastion \u2192 prod SSH",
+      "expected": "ALLOW",
+      "result": {
+        "policy": "P-004",
+        "action": "ALLOW",
+        "reason": "Admins may SSH to prod only through bastion with MFA-validated identity",
+        "request": {
+          "src_zone": "management",
+          "src_host": "mgmt-bastion",
+          "dst_host": "prod-web-01",
+          "dst_port": 22,
+          "identity": "ops-engineer",
+          "has_mtls_cert": true
+        }
+      }
+    }
+  ],
+  "zt_score": {
+    "score": 92.9,
+    "passed": 13,
+    "total": 14,
+    "maturity": "Optimized"
+  }
+}
