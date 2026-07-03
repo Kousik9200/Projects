@@ -1,0 +1,10 @@
+# Security Guardrails & Policy Enforcement Framework
+# No third-party runtime dependencies — policy_engine.py and
+# compliance_reporter.py use only the Python standard library.
+#
+# Optional: install boto3 if you extend policy checks to call AWS APIs live.
+# boto3>=1.34
+#
+# Dev / CI tools (optional):
+# pytest>=7.4
+# checkov>=3.0
